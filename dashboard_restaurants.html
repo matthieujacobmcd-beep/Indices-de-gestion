@@ -685,9 +685,8 @@ function parseWB(wb,fname){
 // ════════════════════════════════════════
 // RENDER ACCUEIL — FORMAT BOUTONS
 // ════════════════════════════════════════
-let accTab = -1; // -1 = Franchise
+let accTab = -1;
 
-// Données comparaison 2025
 const D25 = {
   ca:  [3178058,2165515,1861531,2370662,1457380,1496719,1447178,1268560],
   tacs:[187132,132760,96507,133395,71236,77760,72541,67485],
@@ -697,7 +696,6 @@ const D25 = {
   cf:  [561161,285524,316494,292003,178601,237581,245305,126926]
 };
 
-// Données opérationnelles mois en cours (Juin 2026)
 const DM = {
   tacs26: [165462,124446,89876,126739,65803,72093,69284,63595],
   vphe:   [98.7,88.1,89.2,95.4,110.8,105.2,100.4,98.7],
@@ -709,157 +707,186 @@ const DM = {
   rs:     [3.6,4.8,5.0,4.6,5.0,4.1,3.8,5.0]
 };
 
-function rAcc(){
-  const ns=D.wca[0].length;
-  document.getElementById('acc-s').textContent='S'+ns+' · 2026';
-
-  // Init tabs
-  const tabsEl=document.getElementById('acc-tabs');
-  if(!tabsEl.children.length){
-    const labels=['🏢 Franchise',...R.map(r=>r)];
-    tabsEl.innerHTML=labels.map((l,i)=>`<button class="rtab${i===0?' active':''}" onclick="setAccTab(${i-1})">${l}</button>`).join('');
+function rAcc() {
+  var ns = D.wca[0].length;
+  document.getElementById('acc-s').textContent = 'S'+ns+' · 2026';
+  var tabsEl = document.getElementById('acc-tabs');
+  if (!tabsEl.children.length) {
+    var labels = ['🏢 Franchise'].concat(R);
+    var tabHtml = '';
+    for (var ti=0; ti<labels.length; ti++) {
+      tabHtml += '<button class="rtab' + (ti===0?' active':'') + '" onclick="setAccTab('+(ti-1)+')">' + labels[ti] + '</button>';
+    }
+    tabsEl.innerHTML = tabHtml;
   }
   renderAccBtns(accTab);
 }
 
-window.setAccTab=function(idx){
-  accTab=idx;
-  document.querySelectorAll('#acc-tabs .rtab').forEach((t,i)=>t.classList.toggle('active',i===idx+1));
+window.setAccTab = function(idx) {
+  accTab = idx;
+  document.querySelectorAll('#acc-tabs .rtab').forEach(function(t,i) {
+    t.classList.toggle('active', i === idx+1);
+  });
   renderAccBtns(idx);
 };
 
-function renderAccBtns(idx){
-  const isFranchise = idx===-1;
-  const el = document.getElementById('acc-btns');
-
-  // Valeurs pour le restaurant sélectionné ou franchise
-  function val(arr,agg='sum'){
-    if(!isFranchise)return arr[idx];
-    if(agg==='sum')return arr.reduce((s,v)=>s+(v||0),0);
-    if(agg==='avg')return arr.reduce((s,v)=>s+(v||0),0)/arr.length;
-    if(agg==='avgValid'){const v=arr.filter(x=>x!=null);return v.length?v.reduce((s,x)=>s+x,0)/v.length:null;}
-    return arr[0];
+function getV(arr, idx, agg) {
+  if (idx !== -1) return arr[idx] || 0;
+  if (agg === 'avg') {
+    var valid = arr.filter(function(x){return x!=null;});
+    return valid.length ? valid.reduce(function(s,v){return s+v;},0)/valid.length : 0;
   }
+  return arr.reduce(function(s,v){return s+(v||0);},0);
+}
 
-  // Delta badge
-  function delta(cur,ref,inverted=false){
-    if(!ref||!cur)return '';
-    const d=((cur-ref)/Math.abs(ref)*100);
-    const good=inverted?d<0:d>=0;
-    const sign=d>=0?'+':'';
-    return`<span class="kbtn-delta ${good?'delta-up':'delta-dn'}">${sign}${d.toFixed(1)}%</span>`;
-  }
-  function deltaAbs(cur,ref,inverted=false){
-    if(ref==null||cur==null)return '';
-    const d=cur-ref;const good=inverted?d<0:d>=0;
-    const sign=d>=0?'+':'';return`<span class="kbtn-delta ${good?'delta-up':'delta-dn'}">${sign}${d.toFixed(1)}</span>`;
-  }
+function mkDelta(cur, ref, inv) {
+  if (!ref || cur==null) return '';
+  var d = (cur-ref)/Math.abs(ref)*100;
+  var good = inv ? d<0 : d>=0;
+  var sign = d>=0?'+':'';
+  var cls = good?'delta-up':'delta-dn';
+  return '<span class="kbtn-delta '+cls+'">'+sign+d.toFixed(1)+'%</span>';
+}
 
-  // Couleur valeur
-  function vc(v,ok,bad){
-    if(v==null)return '';
-    if(ok!=null&&v>=ok)return 'ok';
-    if(bad!=null&&v<=bad)return 'bad';
-    return 'warn';
-  }
-  function vcMax(v,ok,bad){// moins = mieux (ok=seuil bon, bad=seuil mauvais)
-    if(v==null)return '';
-    if(ok!=null&&v<=ok)return 'ok';
-    if(bad!=null&&v>=bad)return 'bad';
-    return 'warn';
-  }
-  function vcTO(v){// TO: vert <25%, orange 25-50%, rouge >50%
-    if(v==null)return '';
-    return v<0.25?'ok':v<0.5?'warn':'bad';
-  }
+function mkDeltaAbs(cur, ref, inv) {
+  if (ref==null || cur==null) return '';
+  var d = cur-ref;
+  var good = inv ? d<0 : d>=0;
+  var sign = d>=0?'+':'';
+  var cls = good?'delta-up':'delta-dn';
+  return '<span class="kbtn-delta '+cls+'">'+sign+d.toFixed(1)+'</span>';
+}
 
-  // Construire un bouton
-  function btn(label,value,sub,color='blue',vcls=''){
-    return`<div class="kbtn ${color}">
-      <div class="kbtn-label">${label}</div>
-      <div class="kbtn-value${vcls?' '+vcls:''}">${value}</div>
-      <div class="kbtn-sub">${sub}</div>
-    </div>`;
-  }
+function vcls(v, okMin, badMax) {
+  if (v==null) return '';
+  if (okMin!=null && v>=okMin) return 'ok';
+  if (badMax!=null && v<=badMax) return 'bad';
+  return 'warn';
+}
 
-  // Valeurs
-  const ca26 = val(D.ca);
-  const ca25 = val(D25.ca);
-  const tacs26 = val(DM.tacs26);
-  const tacs25 = val(D25.tacs);
-  const mb26 = isFranchise?val(D.mb_pct,'avg'):D.mb_pct[idx];
-  const mb25 = isFranchise?val(D25.mb,'avg'):D25.mb[idx];
-  const pac26 = isFranchise?val(D.pac_pct,'avg'):D.pac_pct[idx];
-  const pac25 = isFranchise?val(D25.pac,'avg'):D25.pac[idx];
-  const net26 = val(D.net);
-  const net25 = val(D25.net);
-  const cf26 = val(DM.cf26);
-  const cf25 = val(D25.cf);
-  const toAnn = isFranchise?val(D.to_ann,'avg'):D.to_ann[idx];
-  const vphe = isFranchise?val(DM.vphe,'avg'):DM.vphe[idx];
-  const tche = isFranchise?val(DM.tche,'avg'):DM.tche[idx];
-  const uvhe = isFranchise?val(DM.uvhe,'avg'):DM.uvhe[idx];
-  const oepeM = isFranchise?val(D.oepe_m,'avg'):D.oepe_m[idx];
-  const oepeA = isFranchise?val(D.oepe_ann,'avg'):D.oepe_ann[idx];
-  const oepeObj = isFranchise?val(D.oepe_obj,'avg'):D.oepe_obj[idx];
-  const r2pM = isFranchise?val(D.r2p_m,'avg'):D.r2p_m[idx];
-  const r2pA = isFranchise?val(D.r2p_ann,'avg'):D.r2p_ann[idx];
-  const r2pObj = isFranchise?val(D.r2p_obj,'avg'):D.r2p_obj[idx];
-  const ophM = isFranchise?val(DM.oph_m,'avgValid'):DM.oph_m[idx];
-  const ophA = isFranchise?val(D.oph,'avg'):D.oph[idx];
-  const hm = isFranchise?val(D.hm_m,'avg'):D.hm_m[idx];
-  const rs = isFranchise?val(DM.rs,'avg'):DM.rs[idx];
-  const lad = isFranchise?val(DM.lad_pct,'avg'):DM.lad_pct[idx];
+function vclsMax(v, okMax, badMin) {
+  if (v==null) return '';
+  if (okMax!=null && v<=okMax) return 'ok';
+  if (badMin!=null && v>=badMin) return 'bad';
+  return 'warn';
+}
 
-  const sections = [
-    {
-      title:'💰 Financier — Annuel clôturé 2026',
-      color:'blue',
-      btns:[
-        btn('CA Annuel',fmt(ca26),`<span class="kbtn-ref">2025 : ${fmt(ca25)}</span>${delta(ca26,ca25)}`,'blue',ca26>=ca25?'ok':'bad'),
-        btn('Marge Brute',mb26.toFixed(1)+'%',`<span class="kbtn-ref">2025 : ${mb25.toFixed(1)}%</span>${deltaAbs(mb26,mb25)}`,'blue',mb26>=76?'ok':mb26>=74?'warn':'bad'),
-        btn('PAC',pac26.toFixed(1)+'%',`<span class="kbtn-ref">2025 : ${pac25.toFixed(1)}%</span>${deltaAbs(pac26,pac25)}`,'blue',pac26>=35?'ok':pac26>=33?'warn':'bad'),
-        btn('Résultat Net',fmt(net26),`<span class="kbtn-ref">2025 : ${fmt(net25)}</span>${delta(net26,net25)}`,'blue',net26>=0?'ok':'bad'),
-        btn('Cash Flow',fmt(cf26),`<span class="kbtn-ref">2025 : ${fmt(cf25)}</span>${delta(cf26,cf25)}`,'blue',cf26>=cf25?'ok':'warn'),
-        btn('TAC'S',tacs26.toLocaleString('fr-FR'),`<span class="kbtn-ref">2025 : ${tacs25.toLocaleString('fr-FR')}</span>${delta(tacs26,tacs25)}`,'blue',tacs26>=tacs25?'ok':'bad'),
-      ]
-    },
-    {
-      title:'👥 RH — Mois en cours & Annuel',
-      color:'orange',
-      btns:[
-        btn('Turn Over Annuel',p(toAnn*100),`<span class="kbtn-ref">Seuil : 25% / 50%</span>`,'orange',vcTO(toAnn)),
-        btn('VPHE Équipier',vphe.toFixed(1),`<span class="kbtn-ref">Obj. ≥ 100</span>`,'orange',vphe>=100?'ok':vphe>=90?'warn':'bad'),
-        btn('TCHE Équipier',tche.toFixed(2),`<span class="kbtn-ref">Juin 2026</span>`,'orange',''),
-        btn('UVHE Équipier',uvhe.toFixed(2),`<span class="kbtn-ref">Juin 2026</span>`,'orange',''),
-      ]
-    },
-    {
-      title:'⏱ Service — Mois en cours',
-      color:'green',
-      btns:[
-        btn('OEPE Drive',oepeM+'s',`<span class="kbtn-ref">Annuel : ${oepeA}s · Obj. ≤${oepeObj}s</span>${deltaAbs(oepeM,oepeA,true)}`,'green',vcMax(oepeM,oepeObj,oepeObj*1.15)),
-        btn('R2P Salle',r2pM+'s',`<span class="kbtn-ref">Annuel : ${r2pA}s · Obj. ≤${r2pObj}s</span>${deltaAbs(r2pM,r2pA,true)}`,'green',vcMax(r2pM,r2pObj,r2pObj*1.15)),
-        btn('OPH',ophM!=null?ophM.toFixed(1):'—',`<span class="kbtn-ref">Annuel : ${ophA.toFixed(1)} · Obj. ≤50</span>${ophM!=null?deltaAbs(ophM,ophA,true):''}`,'green',ophM!=null?vcMax(ophM,50,70):''),
-      ]
-    },
-    {
-      title:'📱 Digital & Satisfaction',
-      color:'purple',
-      btns:[
-        btn('Hello McDo',p(hm*100),`<span class="kbtn-ref">Obj. ≥ 90%</span>`,'purple',hm>=0.9?'ok':hm>=0.85?'warn':'bad'),
-        btn('Réseaux Sociaux',rs.toFixed(1)+'/5',`<span class="kbtn-ref">Obj. ≥ 3.3</span>`,'purple',rs>=4.3?'ok':rs>=3.3?'warn':'bad'),
-        btn('% LAD / CA',lad.toFixed(1)+'%',`<span class="kbtn-ref">Uber Direct</span>`,'purple',''),
-      ]
-    }
-  ];
+function mkBtn(label, value, sub, color, vc) {
+  return '<div class="kbtn '+color+'">'
+    + '<div class="kbtn-label">'+label+'</div>'
+    + '<div class="kbtn-value'+(vc?' '+vc:'')+'">'+value+'</div>'
+    + '<div class="kbtn-sub">'+sub+'</div>'
+    + '</div>';
+}
 
-  el.innerHTML=sections.map(s=>`
-    <div class="btn-section">
-      <div class="btn-section-title" style="color:var(--${s.color})">${s.title}</div>
-      <div class="btn-grid">${s.btns.join('')}</div>
-    </div>
-  `).join('');
+function renderAccBtns(idx) {
+  var el = document.getElementById('acc-btns');
+  var isFr = idx === -1;
+
+  var ca26  = getV(D.ca, idx, 'sum');
+  var ca25  = getV(D25.ca, idx, 'sum');
+  var tc26  = getV(DM.tacs26, idx, 'sum');
+  var tc25  = getV(D25.tacs, idx, 'sum');
+  var mb26  = isFr ? getV(D.mb_pct, idx, 'avg') : D.mb_pct[idx];
+  var mb25  = isFr ? getV(D25.mb, idx, 'avg') : D25.mb[idx];
+  var pac26 = isFr ? getV(D.pac_pct, idx, 'avg') : D.pac_pct[idx];
+  var pac25 = isFr ? getV(D25.pac, idx, 'avg') : D25.pac[idx];
+  var net26 = getV(D.net, idx, 'sum');
+  var net25 = getV(D25.net, idx, 'sum');
+  var cf26  = getV(DM.cf26, idx, 'sum');
+  var cf25  = getV(D25.cf, idx, 'sum');
+  var toAnn = isFr ? getV(D.to_ann, idx, 'avg') : D.to_ann[idx];
+  var vphe  = isFr ? getV(DM.vphe, idx, 'avg') : DM.vphe[idx];
+  var tche  = isFr ? getV(DM.tche, idx, 'avg') : DM.tche[idx];
+  var uvhe  = isFr ? getV(DM.uvhe, idx, 'avg') : DM.uvhe[idx];
+  var oepeM = isFr ? getV(D.oepe_m, idx, 'avg') : D.oepe_m[idx];
+  var oepeA = isFr ? getV(D.oepe_ann, idx, 'avg') : D.oepe_ann[idx];
+  var oepeO = isFr ? getV(D.oepe_obj, idx, 'avg') : D.oepe_obj[idx];
+  var r2pM  = isFr ? getV(D.r2p_m, idx, 'avg') : D.r2p_m[idx];
+  var r2pA  = isFr ? getV(D.r2p_ann, idx, 'avg') : D.r2p_ann[idx];
+  var r2pO  = isFr ? getV(D.r2p_obj, idx, 'avg') : D.r2p_obj[idx];
+  var ophM  = isFr ? getV(DM.oph_m.map(function(v){return v||0;}), idx, 'avg') : DM.oph_m[idx];
+  var ophA  = isFr ? getV(D.oph, idx, 'avg') : D.oph[idx];
+  var hmM   = isFr ? getV(D.hm_m, idx, 'avg') : D.hm_m[idx];
+  var rsM   = isFr ? getV(DM.rs, idx, 'avg') : DM.rs[idx];
+  var lad   = isFr ? getV(DM.lad_pct, idx, 'avg') : DM.lad_pct[idx];
+
+  var html = '';
+
+  // ── SECTION FINANCIER ──
+  html += '<div class="btn-section">';
+  html += '<div class="btn-section-title" style="color:var(--blue)">💰 Financier — Annuel clôturé 2026</div>';
+  html += '<div class="btn-grid">';
+  html += mkBtn('CA Annuel', fmt(ca26),
+    '<span class="kbtn-ref">2025 : '+fmt(ca25)+'</span> '+mkDelta(ca26,ca25,false),
+    'blue', vcls(ca26-ca25, 0, null));
+  html += mkBtn("TAC'S Annuel", tc26.toLocaleString('fr-FR'),
+    '<span class="kbtn-ref">2025 : '+tc25.toLocaleString('fr-FR')+'</span> '+mkDelta(tc26,tc25,false),
+    'blue', vcls(tc26-tc25, 0, null));
+  html += mkBtn('Marge Brute', mb26.toFixed(1)+'%',
+    '<span class="kbtn-ref">2025 : '+mb25.toFixed(1)+'%</span> '+mkDeltaAbs(mb26,mb25,false),
+    'blue', vcls(mb26, 76, null));
+  html += mkBtn('PAC', pac26.toFixed(1)+'%',
+    '<span class="kbtn-ref">2025 : '+pac25.toFixed(1)+'%</span> '+mkDeltaAbs(pac26,pac25,false),
+    'blue', vcls(pac26, 35, 33));
+  html += mkBtn('Résultat Net', fmt(net26),
+    '<span class="kbtn-ref">2025 : '+fmt(net25)+'</span> '+mkDelta(net26,net25,false),
+    'blue', net26>=0?'ok':'bad');
+  html += mkBtn('Cash Flow', fmt(cf26),
+    '<span class="kbtn-ref">2025 : '+fmt(cf25)+'</span> '+mkDelta(cf26,cf25,false),
+    'blue', vcls(cf26-cf25, 0, null));
+  html += '</div></div>';
+
+  // ── SECTION RH ──
+  html += '<div class="btn-section">';
+  html += '<div class="btn-section-title" style="color:var(--orange)">👥 RH — Mois en cours (Juin 2026)</div>';
+  html += '<div class="btn-grid">';
+  html += mkBtn('Turn Over Annuel', p(toAnn*100),
+    '<span class="kbtn-ref">Seuil : &lt;25% bon · &gt;50% élevé</span>',
+    'orange', toAnn<0.25?'ok':toAnn<0.5?'warn':'bad');
+  html += mkBtn('VPHE Équipier', vphe.toFixed(1),
+    '<span class="kbtn-ref">Obj. ≥ 100 — Juin 2026</span>',
+    'orange', vphe>=100?'ok':vphe>=90?'warn':'bad');
+  html += mkBtn('TCHE Équipier', tche.toFixed(2),
+    '<span class="kbtn-ref">Juin 2026</span>',
+    'orange', '');
+  html += mkBtn('UVHE Équipier', uvhe.toFixed(2),
+    '<span class="kbtn-ref">Juin 2026</span>',
+    'orange', '');
+  html += '</div></div>';
+
+  // ── SECTION SERVICE ──
+  html += '<div class="btn-section">';
+  html += '<div class="btn-section-title" style="color:var(--green)">⏱ Service — Mois en cours (Juin 2026)</div>';
+  html += '<div class="btn-grid">';
+  html += mkBtn('OEPE Drive', Math.round(oepeM)+'s',
+    '<span class="kbtn-ref">Annuel : '+Math.round(oepeA)+'s · Obj. ≤'+Math.round(oepeO)+'s</span> '+mkDeltaAbs(oepeM,oepeA,true),
+    'green', vclsMax(oepeM, oepeO, oepeO*1.15));
+  html += mkBtn('R2P Salle', Math.round(r2pM)+'s',
+    '<span class="kbtn-ref">Annuel : '+Math.round(r2pA)+'s · Obj. ≤'+Math.round(r2pO)+'s</span> '+mkDeltaAbs(r2pM,r2pA,true),
+    'green', vclsMax(r2pM, r2pO, r2pO*1.15));
+  var ophVal = ophM!=null ? ophM.toFixed(1) : '—';
+  var ophSub = '<span class="kbtn-ref">Annuel : '+(ophA?ophA.toFixed(1):'—')+' · Obj. ≤50</span>';
+  if (ophM!=null) ophSub += ' '+mkDeltaAbs(ophM, ophA, true);
+  html += mkBtn('OPH', ophVal, ophSub, 'green', ophM!=null?vclsMax(ophM,50,70):'');
+  html += '</div></div>';
+
+  // ── SECTION DIGITAL ──
+  html += '<div class="btn-section">';
+  html += '<div class="btn-section-title" style="color:var(--purple)">📱 Digital & Satisfaction</div>';
+  html += '<div class="btn-grid">';
+  html += mkBtn('Hello McDo', (hmM*100).toFixed(1)+'%',
+    '<span class="kbtn-ref">Obj. ≥ 90% — Mois en cours</span>',
+    'purple', vcls(hmM, 0.9, 0.85));
+  html += mkBtn('Réseaux Sociaux', rsM.toFixed(1)+'/5',
+    '<span class="kbtn-ref">Obj. ≥ 3.3</span>',
+    'purple', vcls(rsM, 4.3, 3.3));
+  html += mkBtn('% LAD / CA', lad.toFixed(1)+'%',
+    '<span class="kbtn-ref">Uber Direct</span>',
+    'purple', '');
+  html += '</div></div>';
+
+  el.innerHTML = html;
 }
 
 // ════════════════════════════════════════
