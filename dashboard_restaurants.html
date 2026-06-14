@@ -506,10 +506,13 @@ async function autoLoad(){
     }
   }catch(e){}
 
-  // Rien trouvé → chargement manuel
+  // Rien trouvé → afficher avec données statiques
   hideOv();
-  setInfo('Cliquez sur "Charger Excel" pour charger manuellement');
-  document.getElementById('welcome').style.display='flex';
+  setInfo('Données statiques — chargez votre Excel pour actualiser');
+  setStatus('Données intégrées','load');
+  document.getElementById('welcome').style.display='none';
+  document.getElementById('panels').style.display='block';
+  render();
 }
 
 function loadInput(inp){
