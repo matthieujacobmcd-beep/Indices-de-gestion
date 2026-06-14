@@ -708,8 +708,26 @@ function parseWB(wb,fname){
       }
     }catch(e){console.warn('INDICES RH parsing error',e);D.to_ann=STATIC_TO_ANN.slice();D.eff=STATIC_EFF.slice();}
 
-    // Recalcul TAC'S 2026 depuis hebdo si disponible
-    // (col 9 dans onglets = TAC'S année courante)
+    // ── Lire D25 depuis GLOBAL 25 ou GLOBAL PREV ──
+    try {
+      var ws25 = wb.Sheets['GLOBAL 25'] || wb.Sheets['GLOBAL PREV'];
+      if (ws25) {
+        var rows25 = XLSX.utils.sheet_to_json(ws25, {header:1, defval:null});
+        var c25 = [2,5,8,11,14,17,20,23];
+        for (var ri25=0; ri25<rows25.length; ri25++) {
+          var lbl = String(rows25[ri25][0]||'');
+          var vals25 = c25.map(function(c){var v=Number(rows25[ri25][c]);return isNaN(v)?0:v;});
+          var pcts25 = c25.map(function(c){var v=Number(rows25[ri25][c+1]);return isNaN(v)?0:parseFloat((v*100).toFixed(1));});
+          if (lbl.includes('Ventes nettes') && vals25[0]>100000) D25.ca=vals25;
+          else if (lbl.includes('Marge brute') && vals25[0]>100000) { D25.mb=vals25; D25.mb_pct=pcts25; }
+          else if (lbl.includes("main d") && vals25[0]>100000) { D25.mo=vals25; D25.mo_pct=pcts25; }
+          else if (lbl.includes('PAC') && vals25[0]>100000) { D25.pac=vals25; D25.pac_pct=pcts25; }
+          else if (lbl.includes('Cash Flow') && vals25[0]>100000) { D25.cf=vals25; D25.cf_pct=pcts25; }
+          else if (lbl.includes('Revenu net') && Math.abs(vals25[0])>1000) { D25.net=vals25; D25.net_pct=pcts25; }
+        }
+        console.log('✓ D25 chargé depuis', ws25 ? 'GLOBAL 25/PREV' : 'statique');
+      }
+    } catch(e) { console.warn('D25 parsing:', e); }
 
     // Succès
     setInfo(fname+' · chargé le '+new Date().toLocaleDateString('fr-FR'));
@@ -737,13 +755,20 @@ let accTab = -1;   // -1 = Franchise, 0-7 = restaurant
 let accPeriod = 'ann'; // 'ann' | 'mois' | 'sem'
 
 // Données comparaison 2025
+// ── D25 = GLOBAL 25 = données 2025 clôturées ──
 const D25 = {
-  ca:  [3178058,2165515,1861531,2370662,1457380,1496719,1447178,1268560],
-  tacs:[187132,132760,96507,133395,71236,77760,72541,67485],
-  mb:  [76.3,76.7,77.1,76.6,76.2,76.3,76.1,76.1],
-  pac: [37.9,38.0,38.8,37.4,35.5,38.1,36.1,33.4],
-  net: [258804,134249,150909,64445,85093,136196,156698,-7369],
-  cf:  [561161,285524,316494,292003,178601,237581,245305,126926]
+  ca:    [3236964,2159841,1806719,2296967,1416396,1458782,1392956,1201006],
+  mb:    [2425886,1627153,1370634,1722124,1058089,1098938,1049266,898939],
+  mb_pct:[75.9,76.5,76.6,76.0,75.4,76.0,76.0,75.7],
+  mo:    [761477,491289,445440,517884,341440,352151,332387,356103],
+  mo_pct:[23.8,23.1,24.9,22.9,24.3,24.4,24.1,30.0],
+  pac:   [1225344,811314,703250,855773,519442,552108,526346,357574],
+  pac_pct:[38.3,38.1,39.3,37.8,37.0,38.2,38.1,30.1],
+  net:   [236337,139905,159612,67020,91318,150334,161094,-46325],
+  net_pct:[7.4,6.6,8.9,3.0,6.5,10.4,11.7,-3.9],
+  cf:    [514120,285057,306280,254090,180425,237142,232101,83705],
+  cf_pct:[16.1,13.4,17.1,11.2,12.9,16.4,16.8,7.0],
+  tacs:  [187132,132760,96507,133395,71236,77760,72541,67485]
 };
 
 // Données mois glissant (Mai 2026 = dernier mois complet)
