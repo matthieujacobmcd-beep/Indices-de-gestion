@@ -783,8 +783,10 @@ function parseWB(wb,fname){
 // ════════════════════════════════════════
 // RENDER ACCUEIL — FORMAT BOUTONS
 // ════════════════════════════════════════
-let accTab = -1;
+let accTab = -1;   // -1 = Franchise, 0-7 = restaurant
+let accPeriod = 'ann'; // 'ann' | 'mois' | 'sem'
 
+// Données comparaison 2025
 const D25 = {
   ca:  [3178058,2165515,1861531,2370662,1457380,1496719,1447178,1268560],
   tacs:[187132,132760,96507,133395,71236,77760,72541,67485],
@@ -794,194 +796,225 @@ const D25 = {
   cf:  [561161,285524,316494,292003,178601,237581,245305,126926]
 };
 
-const DM = {
-  tacs26: [165462,124446,89876,126739,65803,72093,69284,63595],
-  vphe:   [98.7,88.1,89.2,95.4,110.8,105.2,100.4,98.7],
-  tche:   [5.46,5.24,4.54,5.29,5.16,5.30,4.84,5.08],
-  uvhe:   [34.87,29.73,31.23,34.18,33.83,36.14,32.17,28.90],
-  oph_m:  [41.5,17.0,23.0,101.9,31.8,88.9,31.3,null],
-  cf26:   [462384,262550,295283,244093,151925,229414,200025,124195],
-  lad_pct:[9.2,11.6,1.4,14.8,0.1,0,0,0],
-  rs:     [3.6,4.8,5.0,4.6,5.0,4.1,3.8,5.0]
+// Données mois glissant (Mai 2026 = dernier mois complet)
+const DMOIS = {
+  ca:    [567959,471843,371145,450726,288703,297095,269488,248595],
+  mb:    [75.68,76.03,76.77,75.78,75.68,75.58,76.3,76.09],
+  vph_g: [90.4,88.2,88.9,82.3,83.9,85.4,84.2,84.2],
+  tche:  [5.30,6.18,5.08,4.76,4.76,4.67,4.89,5.24],
+  uvhe:  [34.79,37.02,34.96,31.80,35.58,34.45,32.10,33.20],
+  oepe:  [248,307,273,250,351,227,356,328],
+  oepe_a:[277,349,324,252,334,240,321,285],
+  r2p:   [237,260,233,225,317,198,335,320],
+  r2p_a: [282,302,302,234,327,214,304,291],
+  oph:   [41.5,17.0,23.0,101.9,31.8,88.9,31.3,null],
+  oph_a: [72.0,50.0,43.9,20.6,60.3,13.8,60.7,39.8],
+  hm:    [1.0,0.976,0.99,0.871,0.933,0.964,0.943,1.0],
+  rs:    [3.6,4.8,5.0,4.6,5.0,4.1,3.8,5.0],
+  vphe:  [98.7,88.1,89.2,95.4,110.8,105.2,100.4,98.7],
+  lad:   [9.2,11.6,1.4,14.8,0.1,0,0,0]
+};
+
+// Données semaine glissante (S23 = dernière semaine)
+const DSEM = {
+  tacs: [1108,1102,739,896,578,553,635,458],
+  vphe: [98.7,88.1,89.2,95.3,110.8,105.2,100.4,98.7]
+  // CA S23 depuis D.wca[i][D.wca[i].length-1]
 };
 
 function rAcc() {
   var ns = D.wca[0].length;
   document.getElementById('acc-s').textContent = 'S'+ns+' · 2026';
+  // Tabs restaurants
   var tabsEl = document.getElementById('acc-tabs');
   if (!tabsEl.children.length) {
     var labels = ['🏢 Franchise'].concat(R);
-    var tabHtml = '';
+    var th = '';
     for (var ti=0; ti<labels.length; ti++) {
-      tabHtml += '<button class="rtab' + (ti===0?' active':'') + '" onclick="setAccTab('+(ti-1)+')">' + labels[ti] + '</button>';
+      th += '<button class="rtab'+(ti===0?' active':'')+'" onclick="setAccTab('+(ti-1)+')">' + labels[ti] + '</button>';
     }
-    tabsEl.innerHTML = tabHtml;
+    tabsEl.innerHTML = th;
   }
-  renderAccBtns(accTab);
+  renderAccBtns(accTab, accPeriod);
 }
 
 window.setAccTab = function(idx) {
   accTab = idx;
-  document.querySelectorAll('#acc-tabs .rtab').forEach(function(t,i) {
-    t.classList.toggle('active', i === idx+1);
-  });
-  renderAccBtns(idx);
+  document.querySelectorAll('#acc-tabs .rtab').forEach(function(t,i){t.classList.toggle('active',i===idx+1);});
+  renderAccBtns(accTab, accPeriod);
 };
 
-function getV(arr, idx, agg) {
-  if (idx !== -1) return arr[idx] || 0;
+window.setAccPeriod = function(p) {
+  accPeriod = p;
+  document.querySelectorAll('#acc-period .pbtn').forEach(function(b,i){b.classList.toggle('active',['ann','mois','sem'][i]===p);});
+  renderAccBtns(accTab, accPeriod);
+};
+
+function gv(arr, idx, agg) {
+  if (!arr) return 0;
+  if (idx !== -1) return arr[idx] != null ? arr[idx] : 0;
   if (agg === 'avg') {
-    var valid = arr.filter(function(x){return x!=null;});
-    return valid.length ? valid.reduce(function(s,v){return s+v;},0)/valid.length : 0;
+    var v2 = arr.filter(function(x){return x!=null;});
+    return v2.length ? v2.reduce(function(s,v){return s+v;},0)/v2.length : 0;
   }
   return arr.reduce(function(s,v){return s+(v||0);},0);
 }
 
-function mkDelta(cur, ref, inv) {
-  if (!ref || cur==null) return '';
-  var d = (cur-ref)/Math.abs(ref)*100;
+function mkD(cur,ref,inv,isAbs) {
+  if (!ref||cur==null) return '';
+  var d = isAbs ? cur-ref : (cur-ref)/Math.abs(ref)*100;
   var good = inv ? d<0 : d>=0;
-  var sign = d>=0?'+':'';
   var cls = good?'delta-up':'delta-dn';
-  return '<span class="kbtn-delta '+cls+'">'+sign+d.toFixed(1)+'%</span>';
-}
-
-function mkDeltaAbs(cur, ref, inv) {
-  if (ref==null || cur==null) return '';
-  var d = cur-ref;
-  var good = inv ? d<0 : d>=0;
   var sign = d>=0?'+':'';
-  var cls = good?'delta-up':'delta-dn';
-  return '<span class="kbtn-delta '+cls+'">'+sign+d.toFixed(1)+'</span>';
+  return '<span class="kbtn-delta '+cls+'">'+sign+d.toFixed(1)+(isAbs?'':'%')+'</span>';
 }
 
-function vcls(v, okMin, badMax) {
-  if (v==null) return '';
-  if (okMin!=null && v>=okMin) return 'ok';
-  if (badMax!=null && v<=badMax) return 'bad';
-  return 'warn';
+function vc(v,okMin,warnMin) {
+  if(v==null)return '';
+  if(okMin!=null&&v>=okMin)return 'ok';
+  if(warnMin!=null&&v>=warnMin)return 'warn';
+  return 'bad';
+}
+function vcMax(v,okMax,warnMax) {
+  if(v==null)return '';
+  if(okMax!=null&&v<=okMax)return 'ok';
+  if(warnMax!=null&&v<=warnMax)return 'warn';
+  return 'bad';
 }
 
-function vclsMax(v, okMax, badMin) {
-  if (v==null) return '';
-  if (okMax!=null && v<=okMax) return 'ok';
-  if (badMin!=null && v>=badMin) return 'bad';
-  return 'warn';
-}
-
-function mkBtn(label, value, sub, color, vc) {
+function mkBtn(label, value, sub, color, vc2) {
   return '<div class="kbtn '+color+'">'
-    + '<div class="kbtn-label">'+label+'</div>'
-    + '<div class="kbtn-value'+(vc?' '+vc:'')+'">'+value+'</div>'
-    + '<div class="kbtn-sub">'+sub+'</div>'
-    + '</div>';
+    +'<div class="kbtn-label">'+label+'</div>'
+    +'<div class="kbtn-value'+(vc2?' '+vc2:'')+'">'+value+'</div>'
+    +'<div class="kbtn-sub">'+sub+'</div>'
+    +'</div>';
 }
 
-function renderAccBtns(idx) {
+function na() { return '<span style="color:var(--txt2)">—</span>'; }
+
+function renderAccBtns(idx, period) {
   var el = document.getElementById('acc-btns');
   var isFr = idx === -1;
+  var isAnn = period === 'ann';
+  var isMois = period === 'mois';
+  var isSem = period === 'sem';
 
-  var ca26  = getV(D.ca, idx, 'sum');
-  var ca25  = getV(D25.ca, idx, 'sum');
-  var tc26  = getV(DM.tacs26, idx, 'sum');
-  var tc25  = getV(D25.tacs, idx, 'sum');
-  var mb26  = isFr ? getV(D.mb_pct, idx, 'avg') : D.mb_pct[idx];
-  var mb25  = isFr ? getV(D25.mb, idx, 'avg') : D25.mb[idx];
-  var pac26 = isFr ? getV(D.pac_pct, idx, 'avg') : D.pac_pct[idx];
-  var pac25 = isFr ? getV(D25.pac, idx, 'avg') : D25.pac[idx];
-  var net26 = getV(D.net, idx, 'sum');
-  var net25 = getV(D25.net, idx, 'sum');
-  var cf26  = getV(DM.cf26, idx, 'sum');
-  var cf25  = getV(D25.cf, idx, 'sum');
-  var toAnn = isFr ? getV(D.to_ann, idx, 'avg') : D.to_ann[idx];
-  var vphe  = isFr ? getV(DM.vphe, idx, 'avg') : DM.vphe[idx];
-  var tche  = isFr ? getV(DM.tche, idx, 'avg') : DM.tche[idx];
-  var uvhe  = isFr ? getV(DM.uvhe, idx, 'avg') : DM.uvhe[idx];
-  var oepeM = isFr ? getV(D.oepe_m, idx, 'avg') : D.oepe_m[idx];
-  var oepeA = isFr ? getV(D.oepe_ann, idx, 'avg') : D.oepe_ann[idx];
-  var oepeO = isFr ? getV(D.oepe_obj, idx, 'avg') : D.oepe_obj[idx];
-  var r2pM  = isFr ? getV(D.r2p_m, idx, 'avg') : D.r2p_m[idx];
-  var r2pA  = isFr ? getV(D.r2p_ann, idx, 'avg') : D.r2p_ann[idx];
-  var r2pO  = isFr ? getV(D.r2p_obj, idx, 'avg') : D.r2p_obj[idx];
-  var ophM  = isFr ? getV(DM.oph_m.map(function(v){return v||0;}), idx, 'avg') : DM.oph_m[idx];
-  var ophA  = isFr ? getV(D.oph, idx, 'avg') : D.oph[idx];
-  var hmM   = isFr ? getV(D.hm_m, idx, 'avg') : D.hm_m[idx];
-  var rsM   = isFr ? getV(DM.rs, idx, 'avg') : DM.rs[idx];
-  var lad   = isFr ? getV(DM.lad_pct, idx, 'avg') : DM.lad_pct[idx];
+  // Sélecteur de période
+  var pHtml = '<div id="acc-period" style="display:flex;gap:6px;margin-bottom:16px">'
+    +'<button class="pbtn rtab'+(isAnn?' active':'')+'" onclick="setAccPeriod(\'ann\')">📅 Annuel</button>'
+    +'<button class="pbtn rtab'+(isMois?' active':'')+'" onclick="setAccPeriod(\'mois\')">🗓 Mois glissant (Mai)</button>'
+    +'<button class="pbtn rtab'+(isSem?' active':'')+'" onclick="setAccPeriod(\'sem\')">📆 Semaine glissante (S'+D.wca[0].length+')</button>'
+    +'</div>';
 
-  var html = '';
+  var html = pHtml;
 
   // ── SECTION FINANCIER ──
-  html += '<div class="btn-section">';
-  html += '<div class="btn-section-title" style="color:var(--blue)">💰 Financier — Annuel clôturé 2026</div>';
-  html += '<div class="btn-grid">';
-  html += mkBtn('CA Annuel', fmt(ca26),
-    '<span class="kbtn-ref">2025 : '+fmt(ca25)+'</span> '+mkDelta(ca26,ca25,false),
-    'blue', vcls(ca26-ca25, 0, null));
-  html += mkBtn("TAC'S Annuel", tc26.toLocaleString('fr-FR'),
-    '<span class="kbtn-ref">2025 : '+tc25.toLocaleString('fr-FR')+'</span> '+mkDelta(tc26,tc25,false),
-    'blue', vcls(tc26-tc25, 0, null));
-  html += mkBtn('Marge Brute', mb26.toFixed(1)+'%',
-    '<span class="kbtn-ref">2025 : '+mb25.toFixed(1)+'%</span> '+mkDeltaAbs(mb26,mb25,false),
-    'blue', vcls(mb26, 76, null));
-  html += mkBtn('PAC', pac26.toFixed(1)+'%',
-    '<span class="kbtn-ref">2025 : '+pac25.toFixed(1)+'%</span> '+mkDeltaAbs(pac26,pac25,false),
-    'blue', vcls(pac26, 35, 33));
-  html += mkBtn('Résultat Net', fmt(net26),
-    '<span class="kbtn-ref">2025 : '+fmt(net25)+'</span> '+mkDelta(net26,net25,false),
-    'blue', net26>=0?'ok':'bad');
-  html += mkBtn('Cash Flow', fmt(cf26),
-    '<span class="kbtn-ref">2025 : '+fmt(cf25)+'</span> '+mkDelta(cf26,cf25,false),
-    'blue', vcls(cf26-cf25, 0, null));
+  html += '<div class="btn-section"><div class="btn-section-title" style="color:var(--blue)">💰 Financier — 2026</div><div class="btn-grid">';
+
+  if (isAnn) {
+    var ca26=gv(D.ca,idx,'sum'), ca25=gv(D25.ca,idx,'sum');
+    var tc26=gv(DMOIS.tacs&&DSEM.tacs?[165462,124446,89876,126739,65803,72093,69284,63595]:D.ca,idx,'sum');
+    var tacs26=[165462,124446,89876,126739,65803,72093,69284,63595];
+    var tc=gv(tacs26,idx,'sum'), tc25=gv(D25.tacs,idx,'sum');
+    var mb26=gv(D.mb_pct,idx,'avg'), mb25=gv(D25.mb,idx,'avg');
+    var pac26=gv(D.pac_pct,idx,'avg'), pac25=gv(D25.pac,idx,'avg');
+    var net26=gv(D.net,idx,'sum'), net25=gv(D25.net,idx,'sum');
+    var cf26=gv([462384,262550,295283,244093,151925,229414,200025,124195],idx,'sum'), cf25=gv(D25.cf,idx,'sum');
+    html += mkBtn('CA Annuel 2026',fmt(ca26),'<span class="kbtn-ref">2025 : '+fmt(ca25)+'</span> '+mkD(ca26,ca25,false,false),'blue',vc(ca26-ca25,0,null));
+    html += mkBtn("TAC'S Annuel",tc.toLocaleString('fr-FR'),'<span class="kbtn-ref">2025 : '+tc25.toLocaleString('fr-FR')+'</span> '+mkD(tc,tc25,false,false),'blue',vc(tc-tc25,0,null));
+    html += mkBtn('Marge Brute',mb26.toFixed(1)+'%','<span class="kbtn-ref">2025 : '+mb25.toFixed(1)+'%</span> '+mkD(mb26,mb25,false,true),'blue',vc(mb26,76,74));
+    html += mkBtn('PAC',pac26.toFixed(1)+'%','<span class="kbtn-ref">2025 : '+pac25.toFixed(1)+'%</span> '+mkD(pac26,pac25,false,true),'blue',vc(pac26,35,33));
+    html += mkBtn('Résultat Net',fmt(net26),'<span class="kbtn-ref">2025 : '+fmt(net25)+'</span> '+mkD(net26,net25,false,false),'blue',net26>=0?'ok':'bad');
+    html += mkBtn('Cash Flow',fmt(cf26),'<span class="kbtn-ref">2025 : '+fmt(cf25)+'</span> '+mkD(cf26,cf25,false,false),'blue',vc(cf26-cf25,0,null));
+  } else if (isMois) {
+    var cam=gv(DMOIS.ca,idx,'sum');
+    var caRef=gv(D.ca,idx,'sum'); // Annuel comme référence
+    var mbm=gv(DMOIS.mb,idx,'avg');
+    html += mkBtn('CA Mai 2026',fmt(cam),'<span class="kbtn-ref">Annuel : '+fmt(caRef)+'</span>','blue','');
+    html += mkBtn("TAC'S",na(),'<span class="kbtn-ref">Données annuelles uniquement</span>','blue','');
+    html += mkBtn('Marge Brute',mbm.toFixed(1)+'%','<span class="kbtn-ref">Annuel : '+gv(D.mb_pct,idx,'avg').toFixed(1)+'%</span> '+mkD(mbm,gv(D.mb_pct,idx,'avg'),false,true),'blue',vc(mbm,76,74));
+    html += mkBtn('PAC',na(),'<span class="kbtn-ref">Données annuelles uniquement</span>','blue','');
+    html += mkBtn('Résultat Net',na(),'<span class="kbtn-ref">Données annuelles uniquement</span>','blue','');
+    html += mkBtn('Cash Flow',na(),'<span class="kbtn-ref">Données annuelles uniquement</span>','blue','');
+  } else { // semaine
+    var cas=D.wca[idx===-1?0:idx][D.wca[0].length-1];
+    if(isFr) { cas=0; for(var xi=0;xi<8;xi++) cas+=D.wca[xi][D.wca[xi].length-1]; }
+    var tcas=gv(DSEM.tacs,idx,'sum');
+    html += mkBtn('CA S'+D.wca[0].length,fmt(cas),'<span class="kbtn-ref">Dernière semaine</span>','blue','');
+    html += mkBtn("TAC'S S"+D.wca[0].length,tcas.toLocaleString('fr-FR'),'<span class="kbtn-ref">Dernière semaine</span>','blue','');
+    html += mkBtn('Marge Brute',na(),'<span class="kbtn-ref">Données mensuelles/annuelles</span>','blue','');
+    html += mkBtn('PAC',na(),'<span class="kbtn-ref">Données annuelles uniquement</span>','blue','');
+    html += mkBtn('Résultat Net',na(),'<span class="kbtn-ref">Données annuelles uniquement</span>','blue','');
+    html += mkBtn('Cash Flow',na(),'<span class="kbtn-ref">Données annuelles uniquement</span>','blue','');
+  }
   html += '</div></div>';
 
   // ── SECTION RH ──
-  html += '<div class="btn-section">';
-  html += '<div class="btn-section-title" style="color:var(--orange)">👥 RH — Mois en cours (Juin 2026)</div>';
-  html += '<div class="btn-grid">';
-  html += mkBtn('Turn Over Annuel', p(toAnn*100),
-    '<span class="kbtn-ref">Seuil : &lt;25% bon · &gt;50% élevé</span>',
-    'orange', toAnn<0.25?'ok':toAnn<0.5?'warn':'bad');
-  html += mkBtn('VPHE Équipier', vphe.toFixed(1),
-    '<span class="kbtn-ref">Obj. ≥ 100 — Juin 2026</span>',
-    'orange', vphe>=100?'ok':vphe>=90?'warn':'bad');
-  html += mkBtn('TCHE Équipier', tche.toFixed(2),
-    '<span class="kbtn-ref">Juin 2026</span>',
-    'orange', '');
-  html += mkBtn('UVHE Équipier', uvhe.toFixed(2),
-    '<span class="kbtn-ref">Juin 2026</span>',
-    'orange', '');
+  html += '<div class="btn-section"><div class="btn-section-title" style="color:var(--orange)">👥 RH</div><div class="btn-grid">';
+  if (isAnn) {
+    var toA=gv(D.to_ann,idx,'avg');
+    var vphA=gv([98.7,88.1,89.2,95.4,110.8,105.2,100.4,98.7],idx,'avg');
+    var tcheA=gv([5.46,5.24,4.54,5.29,5.16,5.30,4.84,5.08],idx,'avg');
+    var uvheA=gv([34.87,29.73,31.23,34.18,33.83,36.14,32.17,28.90],idx,'avg');
+    html += mkBtn('Turn Over Annuel',p(toA*100),'<span class="kbtn-ref">Seuil : &lt;25% bon · &gt;50% élevé</span>','orange',toA<0.25?'ok':toA<0.5?'warn':'bad');
+    html += mkBtn('VPHE Équipier',vphA.toFixed(1),'<span class="kbtn-ref">Obj. ≥ 100 — Juin 2026</span>','orange',vc(vphA,100,90));
+    html += mkBtn('TCHE Équipier',tcheA.toFixed(2),'<span class="kbtn-ref">Juin 2026</span>','orange','');
+    html += mkBtn('UVHE Équipier',uvheA.toFixed(2),'<span class="kbtn-ref">Juin 2026</span>','orange','');
+  } else if (isMois) {
+    var toA2=gv(D.to_ann,idx,'avg');
+    var vphM=gv(DMOIS.vph_g,idx,'avg');
+    var tcheM=gv(DMOIS.tche,idx,'avg');
+    var uvheM=gv(DMOIS.uvhe,idx,'avg');
+    var vpheM=gv(DMOIS.vphe,idx,'avg');
+    html += mkBtn('Turn Over Annuel',p(toA2*100),'<span class="kbtn-ref">Seuil : &lt;25% / &gt;50%</span>','orange',toA2<0.25?'ok':toA2<0.5?'warn':'bad');
+    html += mkBtn('VPHE Équipier',vpheM.toFixed(1),'<span class="kbtn-ref">Obj. ≥ 100 — Mai 2026</span>','orange',vc(vpheM,100,90));
+    html += mkBtn('TCHE Équipier',tcheM.toFixed(2),'<span class="kbtn-ref">Mai 2026</span>','orange','');
+    html += mkBtn('UVHE Équipier',uvheM.toFixed(2),'<span class="kbtn-ref">Mai 2026</span>','orange','');
+  } else {
+    var toA3=gv(D.to_ann,idx,'avg');
+    var vpheS=gv(DSEM.vphe,idx,'avg');
+    html += mkBtn('Turn Over Annuel',p(toA3*100),'<span class="kbtn-ref">Seuil : &lt;25% / &gt;50%</span>','orange',toA3<0.25?'ok':toA3<0.5?'warn':'bad');
+    html += mkBtn('VPHE Équipier',vpheS.toFixed(1),'<span class="kbtn-ref">Obj. ≥ 100 — S'+D.wca[0].length+'</span>','orange',vc(vpheS,100,90));
+    html += mkBtn('TCHE Équipier',na(),'<span class="kbtn-ref">Données mensuelles/annuelles</span>','orange','');
+    html += mkBtn('UVHE Équipier',na(),'<span class="kbtn-ref">Données mensuelles/annuelles</span>','orange','');
+  }
   html += '</div></div>';
 
   // ── SECTION SERVICE ──
-  html += '<div class="btn-section">';
-  html += '<div class="btn-section-title" style="color:var(--green)">⏱ Service — Mois en cours (Juin 2026)</div>';
-  html += '<div class="btn-grid">';
-  html += mkBtn('OEPE Drive', Math.round(oepeM)+'s',
-    '<span class="kbtn-ref">Annuel : '+Math.round(oepeA)+'s · Obj. ≤'+Math.round(oepeO)+'s</span> '+mkDeltaAbs(oepeM,oepeA,true),
-    'green', vclsMax(oepeM, oepeO, oepeO*1.15));
-  html += mkBtn('R2P Salle', Math.round(r2pM)+'s',
-    '<span class="kbtn-ref">Annuel : '+Math.round(r2pA)+'s · Obj. ≤'+Math.round(r2pO)+'s</span> '+mkDeltaAbs(r2pM,r2pA,true),
-    'green', vclsMax(r2pM, r2pO, r2pO*1.15));
-  var ophVal = ophM!=null ? ophM.toFixed(1) : '—';
-  var ophSub = '<span class="kbtn-ref">Annuel : '+(ophA?ophA.toFixed(1):'—')+' · Obj. ≤50</span>';
-  if (ophM!=null) ophSub += ' '+mkDeltaAbs(ophM, ophA, true);
-  html += mkBtn('OPH', ophVal, ophSub, 'green', ophM!=null?vclsMax(ophM,50,70):'');
+  html += '<div class="btn-section"><div class="btn-section-title" style="color:var(--green)">⏱ Service</div><div class="btn-grid">';
+  var oepeM2=gv(DMOIS.oepe,idx,'avg');
+  var oepeA2=gv(DMOIS.oepe_a,idx,'avg');
+  var oepeO=gv(D.oepe_obj,idx,'avg');
+  var r2pM2=gv(DMOIS.r2p,idx,'avg');
+  var r2pA2=gv(DMOIS.r2p_a,idx,'avg');
+  var r2pO=gv(D.r2p_obj,idx,'avg');
+  var ophM2=isFr?DMOIS.oph.filter(function(v){return v!=null;}).reduce(function(s,v){return s+v;},0)/DMOIS.oph.filter(function(v){return v!=null;}).length:DMOIS.oph[idx];
+  var ophA2=gv(DMOIS.oph_a,idx,'avg');
+  if (isSem) {
+    html += mkBtn('OEPE Drive',na(),'<span class="kbtn-ref">Données mensuelles/annuelles</span>','green','');
+    html += mkBtn('R2P Salle',na(),'<span class="kbtn-ref">Données mensuelles/annuelles</span>','green','');
+    html += mkBtn('OPH',na(),'<span class="kbtn-ref">Données mensuelles/annuelles</span>','green','');
+  } else {
+    var oepeVal = isAnn ? Math.round(oepeA2) : Math.round(oepeM2);
+    var r2pVal  = isAnn ? Math.round(r2pA2)  : Math.round(r2pM2);
+    var oepeRef = isAnn ? 'Obj. ≤'+Math.round(oepeO)+'s' : 'Annuel : '+Math.round(oepeA2)+'s · Obj. ≤'+Math.round(oepeO)+'s';
+    var r2pRef  = isAnn ? 'Obj. ≤'+Math.round(r2pO)+'s'  : 'Annuel : '+Math.round(r2pA2)+'s · Obj. ≤'+Math.round(r2pO)+'s';
+    var ophVal2 = ophM2!=null ? ophM2.toFixed(1) : '—';
+    var ophRef  = isAnn ? 'Annuel · Obj. ≤50' : 'Annuel : '+ophA2.toFixed(1)+' · Obj. ≤50';
+    html += mkBtn('OEPE Drive',oepeVal+'s','<span class="kbtn-ref">'+oepeRef+'</span>','green',vcMax(oepeVal,oepeO,oepeO*1.15));
+    html += mkBtn('R2P Salle',r2pVal+'s','<span class="kbtn-ref">'+r2pRef+'</span>','green',vcMax(r2pVal,r2pO,r2pO*1.15));
+    html += mkBtn('OPH',ophVal2,'<span class="kbtn-ref">'+ophRef+'</span>','green',ophM2!=null?vcMax(ophM2,50,70):'');
+  }
   html += '</div></div>';
 
   // ── SECTION DIGITAL ──
-  html += '<div class="btn-section">';
-  html += '<div class="btn-section-title" style="color:var(--purple)">📱 Digital & Satisfaction</div>';
-  html += '<div class="btn-grid">';
-  html += mkBtn('Hello McDo', (hmM*100).toFixed(1)+'%',
-    '<span class="kbtn-ref">Obj. ≥ 90% — Mois en cours</span>',
-    'purple', vcls(hmM, 0.9, 0.85));
-  html += mkBtn('Réseaux Sociaux', rsM.toFixed(1)+'/5',
-    '<span class="kbtn-ref">Obj. ≥ 3.3</span>',
-    'purple', vcls(rsM, 4.3, 3.3));
-  html += mkBtn('% LAD / CA', lad.toFixed(1)+'%',
-    '<span class="kbtn-ref">Uber Direct</span>',
-    'purple', '');
+  html += '<div class="btn-section"><div class="btn-section-title" style="color:var(--purple)">📱 Digital & Satisfaction</div><div class="btn-grid">';
+  var hmV=gv(DMOIS.hm,idx,'avg');
+  var rsV=gv(DMOIS.rs,idx,'avg');
+  var ladV=gv(DMOIS.lad,idx,'avg');
+  html += mkBtn('Hello McDo',(hmV*100).toFixed(1)+'%','<span class="kbtn-ref">Obj. ≥ 90%'+(isSem?' — Données mensuelles':' — Mois en cours')+'</span>','purple',vc(hmV,0.9,0.85));
+  html += mkBtn('Réseaux Sociaux',rsV.toFixed(1)+'/5','<span class="kbtn-ref">Obj. ≥ 3.3'+(isSem?' — Données mensuelles':'')+'</span>','purple',vc(rsV,4.3,3.3));
+  html += mkBtn('% LAD / CA',ladV.toFixed(1)+'%','<span class="kbtn-ref">Uber Direct</span>','purple','');
   html += '</div></div>';
 
   el.innerHTML = html;
