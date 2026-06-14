@@ -154,56 +154,32 @@ tr.fr td{background:rgba(255,255,255,.04);font-weight:600;border-top:1px solid v
 </div>
 
 <script>
-var PWD_HASH = '6f0f62bbfd6428526cf170e51a006ad27ee92d94b796ab5e79816026019dc6b3';
-
-async function checkPwd() {
-  var input = document.getElementById('pwd-input').value;
-  try {
-    // Web Crypto API (natif navigateur, fiable)
-    var encoder = new TextEncoder();
-    var data = encoder.encode(input);
-    var hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
-    var hashArray = Array.from(new Uint8Array(hashBuffer));
-    var hash = hashArray.map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
-    if (hash === PWD_HASH) {
-      loginSuccess();
-    } else {
-      loginError();
-    }
-  } catch(e) {
-    // Fallback simple si crypto non disponible
-    if (input === 'Chamnordaixlesbains') {
-      loginSuccess();
-    } else {
-      loginError();
-    }
+function checkPwd() {
+  var input = document.getElementById('pwd-input').value.trim();
+  // Comparaison avec mot de passe encodé en base64
+  var ok = false;
+  try { ok = (btoa(unescape(encodeURIComponent(input))) === 'Q2hhbW5vcmRhaXhsZXNiYWlucw=='); } catch(e) { ok = (input === 'Chamnordaixlesbains'); }
+  if (ok) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('welcome').style.display = 'none';
+    document.getElementById('panels').style.display = 'block';
+    render();
+    setTimeout(function(){ autoLoad(); }, 200);
+  } else {
+    document.getElementById('pwd-error').style.display = 'block';
+    document.getElementById('pwd-input').value = '';
+    document.getElementById('pwd-input').focus();
+    var inp = document.getElementById('pwd-input');
+    inp.style.border = '1px solid #f75f5f';
+    setTimeout(function(){ inp.style.border = '1px solid rgba(255,255,255,.1)'; }, 600);
   }
 }
-
-function loginSuccess() {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('pwd-error').style.display = 'none';
-  // Afficher d'abord les données statiques, puis tenter le chargement auto
-  document.getElementById('welcome').style.display = 'none';
-  document.getElementById('panels').style.display = 'block';
-  render();
-  // Tentative de chargement depuis OneDrive en arrière-plan
-  setTimeout(function(){ autoLoad(); }, 100);
-}
-
-function loginError() {
-  document.getElementById('pwd-error').style.display = 'block';
-  document.getElementById('pwd-input').value = '';
-  document.getElementById('pwd-input').focus();
-  var inp = document.getElementById('pwd-input');
-  inp.style.border = '1px solid #f75f5f';
-  setTimeout(function(){ inp.style.border = '1px solid rgba(255,255,255,.1)'; }, 600);
-}
-
 window.addEventListener('load', function() {
   document.getElementById('pwd-input').focus();
 });
 </script>
+
+<div class="ov"
 
 <div class="ov" id="ov"><div class="spin"></div><div style="color:var(--txt2);font-size:13px" id="ovmsg">Chargement...</div></div>
 
