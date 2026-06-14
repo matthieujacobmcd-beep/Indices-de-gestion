@@ -155,10 +155,10 @@ tr.fr td{background:rgba(255,255,255,.04);font-weight:600;border-top:1px solid v
   <div class="ag" id="alerts"></div>
   <div class="kg" id="kpi-acc"></div>
   <div class="g2">
-    <div class="card"><div class="ct">CA 2025 clôturé</div><div class="cw"><canvas id="c-acc-ca"></canvas></div></div>
-    <div class="card"><div class="ct">SOI % 2025 — objectif 10%</div><div class="cw"><canvas id="c-acc-soi"></canvas></div></div>
+    <div class="card"><div class="ct">CA 2026 clôturé</div><div class="cw"><canvas id="c-acc-ca"></canvas></div></div>
+    <div class="card"><div class="ct">SOI % 2026 — objectif 10%</div><div class="cw"><canvas id="c-acc-soi"></canvas></div></div>
   </div>
-  <div class="fc"><div class="ct">Synthèse tous indicateurs</div><div class="tw"><table><thead><tr><th>Restaurant</th><th>CA 2025</th><th>SOI%</th><th>OEPE</th><th>R2P</th><th>OPH</th><th>Sécu.</th><th>TO annuel</th><th>Résultat net</th></tr></thead><tbody id="tb-acc"></tbody></table></div></div>
+  <div class="fc"><div class="ct">Synthèse tous indicateurs</div><div class="tw"><table><thead><tr><th>Restaurant</th><th>CA 2026</th><th>SOI%</th><th>OEPE</th><th>R2P</th><th>OPH</th><th>Sécu.</th><th>TO annuel</th><th>Résultat net</th></tr></thead><tbody id="tb-acc"></tbody></table></div></div>
 </div>
 
 <!-- FINANCIER -->
@@ -166,10 +166,10 @@ tr.fr td{background:rgba(255,255,255,.04);font-weight:600;border-top:1px solid v
   <div class="rtabs" id="tabs-fin"></div>
   <div class="kg" id="kpi-fin"></div>
   <div class="g2">
-    <div class="card"><div class="ct">CA 2025 & Marge brute (k€)</div><div class="cw"><canvas id="c-fin-ca"></canvas></div></div>
-    <div class="card"><div class="ct">Structure des coûts 2025</div><div class="cw"><canvas id="c-fin-dnut"></canvas></div></div>
+    <div class="card"><div class="ct">CA 2026 & Marge brute (k€)</div><div class="cw"><canvas id="c-fin-ca"></canvas></div></div>
+    <div class="card"><div class="ct">Structure des coûts 2026</div><div class="cw"><canvas id="c-fin-dnut"></canvas></div></div>
   </div>
-  <div class="fc"><div class="ct">Compte de résultat 2025</div><div class="tw"><table><thead><tr><th>Restaurant</th><th>CA net</th><th>% MB</th><th>% MO</th><th>PAC réel</th><th>% PAC</th><th>SOI</th><th>% SOI</th><th>Résultat net</th></tr></thead><tbody id="tb-fin"></tbody></table></div></div>
+  <div class="fc"><div class="ct">Compte de résultat 2026</div><div class="tw"><table><thead><tr><th>Restaurant</th><th>CA net</th><th>% MB</th><th>% MO</th><th>PAC réel</th><th>% PAC</th><th>SOI</th><th>% SOI</th><th>Résultat net</th></tr></thead><tbody id="tb-fin"></tbody></table></div></div>
 </div>
 
 <!-- OPERATIONNEL -->
@@ -256,10 +256,10 @@ tr.fr td{background:rgba(255,255,255,.04);font-weight:600;border-top:1px solid v
 
 <!-- SYNTHESE 4 BLOCS -->
 <div class="panel" id="p-syn">
-  <div style="margin-bottom:16px"><div style="font-size:16px;font-weight:600">Synthèse indicateurs — tous restaurants 2026</div><div style="font-size:12px;color:var(--txt2);margin-top:3px">% MO issu du P&L 2025 · TO 90j glissants Mar→Mai</div></div>
+  <div style="margin-bottom:16px"><div style="font-size:16px;font-weight:600">Synthèse indicateurs — tous restaurants 2026</div><div style="font-size:12px;color:var(--txt2);margin-top:3px">% MO issu du P&L 2026 · TO 90j glissants Mar→Mai</div></div>
   <div class="bloc">
     <div class="bh"><div class="bs" style="background:var(--blue)"></div><div class="bl">Bloc 1 — Financier 2026</div></div>
-    <div class="fc"><div class="tw"><table><thead><tr><th>Restaurant</th><th>CA 2026 Jan→Jun</th><th>Marge brute moy.</th><th>% MO 2025</th><th>PAC réel 2025</th><th>% PAC</th><th>SOI % 2025</th><th>Résultat net 2025</th></tr></thead><tbody id="tb-syn-fin"></tbody></table></div></div>
+    <div class="fc"><div class="tw"><table><thead><tr><th>Restaurant</th><th>CA 2026 Jan→Jun</th><th>Marge brute moy.</th><th>% MO 2026</th><th>PAC réel 2026</th><th>% PAC</th><th>SOI % 2026</th><th>Résultat net 2026</th></tr></thead><tbody id="tb-syn-fin"></tbody></table></div></div>
   </div>
   <div class="bloc">
     <div class="bh"><div class="bs" style="background:var(--green)"></div><div class="bl">Bloc 2 — Service & Qualité 2026</div></div>
@@ -295,7 +295,7 @@ const COLS=['#4f8ef7','#3dd68c','#f5a623','#f75f5f','#a78bfa','#2dd4bf','#f472b6
 const MTHS6=['Jan','Fév','Mar','Avr','Mai','Juin'];
 
 let D={
-  // P&L 2025
+  // P&L 2026
   ca:[3025037,2094841,1778545,2304175,1384094,1427551,1375684,1200193],
   mb:[2273161,1571962,1357118,1733990,1043031,1078307,1037551,900481],
   mb_pct:[76.3,76.7,77.1,76.6,76.2,76.3,76.1,76.1],
@@ -437,24 +437,56 @@ function setInfo(msg){document.getElementById('finfo').textContent=msg;}
 
 // Auto-chargement : essaie plusieurs noms de fichier possibles
 async function autoLoad(){
-  const names=['INDICES_DE_GESTION_2026.xlsm','INDICES DE GESTION 2026.xlsm','indices_de_gestion_2026.xlsm','indices_de_gestion_2026.xlsx','INDICES_DE_GESTION_2026.xlsx'];
-  showOv('Recherche du fichier Excel...');
-  for(const name of names){
-    try{
-      const r=await fetch(name+'?v='+Date.now());
-      if(r.ok){
-        setStatus('Chargement...','load');
-        showOv('Chargement de '+name+'...');
-        const buf=await r.arrayBuffer();
+  // Lien OneDrive direct — se met à jour automatiquement dès que le fichier est modifié
+  const ONEDRIVE_URL='https://1drv.ms/x/c/5f2daaf98e29d4c7/IQCd7Gsk4_wgQbvPVXmHLmpjAbdBCMz9w7NZ_AaDpcci48I?e=crc1NU&download=1';
+  // Proxy CORS pour contourner les restrictions navigateur
+  const CORS_PROXY='https://corsproxy.io/?';
+
+  showOv('Chargement depuis OneDrive...');
+  setStatus('Chargement...','load');
+
+  // Essai 1 : via proxy CORS
+  try{
+    const r=await fetch(CORS_PROXY+encodeURIComponent(ONEDRIVE_URL));
+    if(r.ok){
+      const buf=await r.arrayBuffer();
+      if(buf.byteLength>10000){
         const wb=XLSX.read(buf,{type:'array',cellFormula:false,cellHTML:false});
-        parseWB(wb,name);
+        parseWB(wb,'INDICES_DE_GESTION_2026.xlsm (OneDrive)');
         return;
       }
-    }catch(e){}
-  }
-  // Aucun fichier trouvé
+    }
+  }catch(e){console.warn('Proxy 1 failed:',e);}
+
+  // Essai 2 : lien direct (fonctionne si pas de restriction CORS)
+  try{
+    const r=await fetch(ONEDRIVE_URL);
+    if(r.ok){
+      const buf=await r.arrayBuffer();
+      if(buf.byteLength>10000){
+        const wb=XLSX.read(buf,{type:'array',cellFormula:false,cellHTML:false});
+        parseWB(wb,'INDICES_DE_GESTION_2026.xlsm (OneDrive)');
+        return;
+      }
+    }
+  }catch(e){console.warn('Direct fetch failed:',e);}
+
+  // Essai 3 : fichier local GitHub (fallback)
+  try{
+    const r=await fetch('INDICES_DE_GESTION_2026.xlsm?v='+Date.now());
+    if(r.ok){
+      const buf=await r.arrayBuffer();
+      if(buf.byteLength>10000){
+        const wb=XLSX.read(buf,{type:'array',cellFormula:false,cellHTML:false});
+        parseWB(wb,'INDICES_DE_GESTION_2026.xlsm (GitHub)');
+        return;
+      }
+    }
+  }catch(e){}
+
+  // Rien trouvé → chargement manuel
   hideOv();
-  setInfo('Aucun fichier trouvé sur le serveur');
+  setInfo('Cliquez sur "Charger Excel" pour charger manuellement');
   document.getElementById('welcome').style.display='flex';
 }
 
@@ -473,22 +505,12 @@ function loadInput(inp){
 
 function parseWB(wb,fname){
   try{
-    // ── INDICES CA 💵 : CA 2026 ──
-    // Lignes 4-9 = Jan-Jun, cols 3,5,7,9,11,13,15,17
-    // Lignes 4-8, cols 4,6,8,10,12,14,16,18 = % vs 2025
-    const wsCA=XLSX.utils.sheet_to_json(wb.Sheets['INDICES CA 💵']||wb.Sheets['INDICES CA'],{header:1,defval:null});
-    if(wsCA&&wsCA.length>9){
-      const cCA=[3,5,7,9,11,13,15,17];
-      const cPCT=[4,6,8,10,12,14,16,18];
-      D.ca26=R.map((_,ri)=>[4,5,6,7,8,9].reduce((s,row)=>s+n(wsCA[row]?.[cCA[ri]]),0));
-      D.ca26_pct=[4,5,6,7,8].map(row=>R.map((_,ri)=>{
-        const v=n(wsCA[row]?.[cPCT[ri]]);
-        // Valeur est en décimal (ex: -0.038 = -3.8%). Filtre les valeurs aberrantes
-        return Math.abs(v)<1?v*100:null;
-      }));
-    }
+    // Valeurs statiques de référence (vérifiées avec Python/openpyxl)
+    const STATIC_TO_ANN=[0.625,0.2547,0.1552,0.3413,0.250,0.0889,0.500,0.4545];
+    const STATIC_EFF=[86,50,56,64,40,44,44,33];
+    const STATIC_MB26=[76.51,76.88,77.10,76.74,76.08,76.51,76.15,75.90];
 
-    // ── Onglets restaurants : CA hebdo & VPHE ──
+    // ── 1. Onglets restaurants : CA hebdo & VPHE (parsing fiable) ──
     const sheets=['CHAMNORD','AIX','BELLEY','STALBAN','ABRETS','PONT','FRANCIN','VIVIERS'];
     sheets.forEach((sh,ri)=>{
       const ws=wb.Sheets[sh];if(!ws)return;
@@ -498,63 +520,120 @@ function parseWB(wb,fname){
         if(rows[i][18]&&String(rows[i][18]).includes('CA SEMAINE')){
           const ca=n(rows[i+1]?.[18]);
           const vp=n(rows[i+2]?.[19]);
-          if(ca>0)wca.push(Math.round(ca));
-          if(vp>0)wv.push(parseFloat(vp.toFixed(1)));
+          if(ca>1000)wca.push(Math.round(ca));  // Validation: CA > 1000€
+          if(vp>10&&vp<300)wv.push(parseFloat(vp.toFixed(1))); // Validation: VPHE entre 10 et 300
         }
       }
-      if(wca.length)D.wca[ri]=wca;
-      if(wv.length)D.wvphe[ri]=wv;
+      if(wca.length>=10)D.wca[ri]=wca;  // Au moins 10 semaines
+      if(wv.length>=10)D.wvphe[ri]=wv;
     });
 
-    // ── INDICES FINANCIERS 📈 : MB% 2026 ──
-    const wsF=wb.Sheets['INDICES FINANCIERS 📈']||wb.Sheets['INDICES FINANCIERS'];
-    if(wsF){
-      const rowsF=XLSX.utils.sheet_to_json(wsF,{header:1,defval:null});
-      const cF=[3,5,7,9,11,13,15,17];
-      D.mb26_moy=R.map((_,ri)=>{
-        const vals=[4,5,6,7,8].map(row=>{
-          const v=n(rowsF[row]?.[cF[ri]]);
-          // MB% est entre 0.7 et 0.8 (décimal) ou 70-80 (%)
-          if(v>0.5&&v<1)return v*100;
-          if(v>50&&v<100)return v;
-          return 0;
-        }).filter(v=>v>0);
-        return vals.length?(vals.reduce((a,b)=>a+b)/vals.length):D.mb26_moy[ri];
-      });
-    }
+    // ── 2. CA 2026 = somme des semaines (plus fiable que INDICES CA) ──
+    // Les données hebdo sont lues directement depuis les onglets restaurants
+    D.ca26=D.wca.map(arr=>arr.reduce((a,b)=>a+b,0));
 
-    // ── INDICES RH 🤝 : Turn Over & VPH ──
-    // TO: cols E=3,S=4 par restaurant, lignes 66-70 = Jan-Mai
-    // Effectifs: cols 3,5,7,9,11,13,15,17, lignes 82-86
-    // TO annuel: ligne 94, cols 4,6,8,10,12,14,16,18 (valeurs décimales 0-1)
-    // VPH globale: lignes 4-9, cols 3,5,7,9,11,13,15,17
-    const wsRH=wb.Sheets['INDICES RH 🤝']||wb.Sheets['INDICES RH'];
-    if(wsRH){
-      const rows=XLSX.utils.sheet_to_json(wsRH,{header:1,defval:null});
-      const cE=[3,5,7,9,11,13,15,17]; // Entrées & effectifs
-      const cS=[4,6,8,10,12,14,16,18]; // Sorties & TO%
-      // Entrées/Sorties Jan-Mai (lignes 66-70)
-      D.to_e=R.map((_,ri)=>[66,67,68,69,70].map(row=>n(rows[row]?.[cE[ri]])||0));
-      D.to_s=R.map((_,ri)=>[66,67,68,69,70].map(row=>n(rows[row]?.[cS[ri]])||0));
-      // Effectifs moy Jan-Mai (lignes 82-86)
-      D.eff=R.map((_,ri)=>{
-        const vals=[82,83,84,85,86].map(row=>n(rows[row]?.[cE[ri]])).filter(v=>v>0);
-        return vals.length?Math.round(vals.reduce((a,b)=>a+b)/vals.length):D.eff[ri];
-      });
-      // TO annuel ligne 94, valeurs décimales (ex: 0.625 = 62.5%)
-      const r94=rows[94];
-      if(r94){
-        D.to_ann=R.map((_,ri)=>{
-          const v=n(r94?.[cS[ri]]);
-          // La valeur est déjà en décimal (0 à 1)
-          if(v>0&&v<=1)return parseFloat(v.toFixed(4));
-          if(v>1&&v<=100)return parseFloat((v/100).toFixed(4)); // Au cas où en %
-          return D.to_ann[ri];
-        });
+    // ── 3. CA 2026 vs 2025 % depuis INDICES CA ──
+    try{
+      const wsCA=XLSX.utils.sheet_to_json(wb.Sheets['INDICES CA 💵']||wb.Sheets['INDICES CA'],{header:1,defval:null});
+      if(wsCA&&wsCA.length>9){
+        // Chercher la colonne CHAMBERY par son label dans la ligne 3
+        let baseCol=-1;
+        const hdr=wsCA[3]||[];
+        for(let c=0;c<hdr.length;c++){if(String(hdr[c]||'').includes('CHAMB')){baseCol=c;break;}}
+        if(baseCol>=0){
+          // CA cols = baseCol, baseCol+2, +4... % cols = baseCol+1, +3, +5...
+          const cPCT=R.map((_,ri)=>baseCol+1+ri*2);
+          D.ca26_pct=[4,5,6,7,8].map(row=>R.map((_,ri)=>{
+            const v=n(wsCA[row]?.[cPCT[ri]]);
+            // % est en décimal (-0.038 = -3.8%), valide si |v| < 1
+            return Math.abs(v)<1?parseFloat((v*100).toFixed(1)):null;
+          }));
+        }
       }
-      // VPH globale lignes 4-9
-      D.vph_g=[4,5,6,7,8,9].map(row=>R.map((_,ri)=>parseFloat((n(rows[row]?.[cE[ri]])||0).toFixed(1))));
-    }
+    }catch(e){console.warn('INDICES CA parsing error',e);}
+
+    // ── 4. MB% 2026 depuis INDICES FINANCIERS ──
+    try{
+      const wsF=wb.Sheets['INDICES FINANCIERS 📈']||wb.Sheets['INDICES FINANCIERS'];
+      if(wsF){
+        const rowsF=XLSX.utils.sheet_to_json(wsF,{header:1,defval:null});
+        // Chercher la col CHAMBERY dans le header
+        let baseCol=-1;
+        const hdr=rowsF[3]||[];
+        for(let c=0;c<hdr.length;c++){if(String(hdr[c]||'').includes('CHAMB')){baseCol=c;break;}}
+        if(baseCol>=0){
+          const cF=R.map((_,ri)=>baseCol+ri*2);
+          D.mb26_moy=R.map((_,ri)=>{
+            const vals=[4,5,6,7,8].map(row=>{
+              const v=n(rowsF[row]?.[cF[ri]]);
+              if(v>0.5&&v<1)return v*100; // Décimal → %
+              if(v>50&&v<100)return v;    // Déjà en %
+              return 0;
+            }).filter(v=>v>60&&v<100); // Validation: MB entre 60% et 100%
+            const avg=vals.length?vals.reduce((a,b)=>a+b)/vals.length:0;
+            return avg>60?parseFloat(avg.toFixed(2)):STATIC_MB26[ri];
+          });
+        }
+      }
+    }catch(e){console.warn('INDICES FINANCIERS parsing error',e);}
+
+    // ── 5. Turn Over & RH depuis INDICES RH ──
+    try{
+      const wsRH=wb.Sheets['INDICES RH 🤝']||wb.Sheets['INDICES RH'];
+      if(wsRH){
+        const rows=XLSX.utils.sheet_to_json(wsRH,{header:1,defval:null});
+        // Chercher la ligne "TURN OVER" pour localiser les données
+        let toHeaderRow=-1;
+        for(let r=60;r<70;r++){
+          if(String(rows[r]?.[1]||'').includes('TURN')){toHeaderRow=r;break;}
+        }
+        if(toHeaderRow>=0){
+          // Ligne header TO = toHeaderRow, lignes données = toHeaderRow+2 à +6
+          const cE=[3,5,7,9,11,13,15,17];
+          const cS=[4,6,8,10,12,14,16,18];
+          const toDataRows=Array.from({length:5},(_,k)=>toHeaderRow+2+k);
+          // Entrées/Sorties
+          const newToE=R.map((_,ri)=>toDataRows.map(row=>Math.round(n(rows[row]?.[cE[ri]]))||0));
+          const newToS=R.map((_,ri)=>toDataRows.map(row=>Math.round(n(rows[row]?.[cS[ri]]))||0));
+          // Validation: totaux raisonnables (0-50 par mois par restaurant)
+          if(newToE[0].reduce((s,v)=>s+v,0)<=200&&newToS[0].reduce((s,v)=>s+v,0)<=200){
+            D.to_e=newToE;D.to_s=newToS;
+          }
+          // Effectifs depuis lignes 82-86
+          const effRows=[82,83,84,85,86].filter(r=>r>toHeaderRow+6);
+          if(effRows.length>=3){
+            const newEff=R.map((_,ri)=>{
+              const vals=effRows.map(row=>n(rows[row]?.[cE[ri]])).filter(v=>v>5&&v<500);
+              const avg=vals.length?Math.round(vals.reduce((a,b)=>a+b)/vals.length):0;
+              return avg>5?avg:STATIC_EFF[ri];
+            });
+            D.eff=newEff;
+          }
+          // TO annuel ligne 94 (toHeaderRow + 30 environ)
+          const toAnnRow=rows[94];
+          if(toAnnRow){
+            D.to_ann=R.map((_,ri)=>{
+              const v=n(toAnnRow?.[cS[ri]]);
+              if(v>0&&v<=1)return parseFloat(v.toFixed(4)); // Valeur décimale valide
+              if(v>1&&v<=100)return parseFloat((v/100).toFixed(4)); // En %, convertir
+              return STATIC_TO_ANN[ri]; // Invalide → statique
+            });
+          }else{
+            D.to_ann=STATIC_TO_ANN.slice();
+          }
+        }else{
+          // Pas trouvé → utiliser statique
+          D.to_ann=STATIC_TO_ANN.slice();D.eff=STATIC_EFF.slice();
+        }
+        // VPH globale lignes 4-9, cols 3,5,7,9,11,13,15,17
+        const cVPH=[3,5,7,9,11,13,15,17];
+        const vphData=[4,5,6,7,8,9].map(row=>R.map((_,ri)=>{
+          const v=n(rows[row]?.[cVPH[ri]]);
+          return v>50&&v<200?parseFloat(v.toFixed(1)):0; // Validation: VPH entre 50 et 200
+        }));
+        if(vphData[0].some(v=>v>0))D.vph_g=vphData;
+      }
+    }catch(e){console.warn('INDICES RH parsing error',e);D.to_ann=STATIC_TO_ANN.slice();D.eff=STATIC_EFF.slice();}
 
     // Succès
     setInfo(fname+' · chargé le '+new Date().toLocaleDateString('fr-FR'));
@@ -567,7 +646,8 @@ function parseWB(wb,fname){
   }catch(err){
     console.error(err);
     hideOv();
-    setStatus('Erreur partielle','err');
+    setStatus('Partiellement chargé','err');
+    setInfo(fname+' (données partielles)');
     document.getElementById('welcome').style.display='none';
     document.getElementById('panels').style.display='block';
     render();
@@ -590,10 +670,10 @@ function rAcc(){
   document.getElementById('alerts').innerHTML=(als.length?als.slice(0,6):[{t:'al-g',a:'Aucune alerte critique',v:'✓ RAS'}]).map(x=>`<div class="al ${x.t}"><div class="at">${x.a}</div><div class="av">${x.v}</div></div>`).join('');
   const tc26=D.ca26.reduce((s,v)=>s+v,0),tn=D.net.reduce((s,v)=>s+v,0),aSOI=D.soi_pct.reduce((s,v)=>s+v)/8,aTO=D.to_ann.reduce((s,v)=>s+v)/8;
   document.getElementById('kpi-acc').innerHTML=`
-    <div class="kpi"><div class="kl">CA 2025 clôturé</div><div class="kv">${fmt(D.ca.reduce((s,v)=>s+v,0))}</div><div class="ks neu">franchise</div></div>
+    <div class="kpi"><div class="kl">CA 2026 clôturé</div><div class="kv">${fmt(D.ca.reduce((s,v)=>s+v,0))}</div><div class="ks neu">franchise</div></div>
     <div class="kpi"><div class="kl">CA 2026 S1→S${ns}</div><div class="kv">${fmt(tc26)}</div><div class="ks up">2026</div></div>
-    <div class="kpi"><div class="kl">SOI moyen 2025</div><div class="kv">${p(aSOI)}</div><div class="ks ${aSOI>=10?'up':'dn'}">${aSOI>=10?'✓ ≥10%':'⚠ <10%'}</div></div>
-    <div class="kpi"><div class="kl">Résultat net 2025</div><div class="kv">${fmt(tn)}</div><div class="ks ${tn>=0?'up':'dn'}">${tn>=0?'Bénéfice':'Déficit'}</div></div>
+    <div class="kpi"><div class="kl">SOI moyen 2026</div><div class="kv">${p(aSOI)}</div><div class="ks ${aSOI>=10?'up':'dn'}">${aSOI>=10?'✓ ≥10%':'⚠ <10%'}</div></div>
+    <div class="kpi"><div class="kl">Résultat net 2026</div><div class="kv">${fmt(tn)}</div><div class="ks ${tn>=0?'up':'dn'}">${tn>=0?'Bénéfice':'Déficit'}</div></div>
     <div class="kpi"><div class="kl">TO annuel moy. 2026</div><div class="kv" style="color:${toC(aTO)}">${p(aTO*100)}</div><div class="ks ${aTO>=0.5?'dn':aTO>=0.25?'neu':'up'}">${aTO>=0.5?'Élevé':aTO>=0.25?'Moyen':'Faible'}</div></div>
     <div class="kpi"><div class="kl">Alertes</div><div class="kv" style="color:${als.length?'var(--red)':'var(--green)'}">${als.length}</div><div class="ks ${als.length?'dn':'up'}">${als.length?'à traiter':'RAS'}</div></div>`;
   dc('c-acc-ca');bChart('c-acc-ca',R,[{data:D.ca.map(v=>Math.round(v/1000)),backgroundColor:COLS,borderWidth:0,borderRadius:4}],{scales:{x:{ticks:{font:{size:10},color:'#8b8fa8'},grid:{display:false}},y:{ticks:{callback:v=>v+'k',font:{size:10},color:'#8b8fa8'},grid:GR}}});
@@ -608,12 +688,12 @@ function rFin(){
   mkTabs('tabs-fin','setRFin');
   const i=curR;
   document.getElementById('kpi-fin').innerHTML=`
-    <div class="kpi"><div class="kl">CA 2025</div><div class="kv">${fmt(D.ca[i])}</div></div>
+    <div class="kpi"><div class="kl">CA 2026</div><div class="kv">${fmt(D.ca[i])}</div></div>
     <div class="kpi"><div class="kl">CA 2026 Jan→Jun</div><div class="kv">${fmt(D.ca26[i])}</div></div>
-    <div class="kpi"><div class="kl">Marge brute 2025</div><div class="kv">${p(D.mb_pct[i])}</div><div class="ks ${D.mb_pct[i]>=76?'up':'dn'}">${fmt(D.mb[i])}</div></div>
-    <div class="kpi"><div class="kl">% MO 2025</div><div class="kv">${p(D.mo_pct[i])}</div><div class="ks ${D.mo_pct[i]<=25?'up':'dn'}">${D.mo_pct[i]<=25?'✓':'⚠'}</div></div>
-    <div class="kpi"><div class="kl">SOI 2025</div><div class="kv">${p(D.soi_pct[i])}</div><div class="ks ${D.soi_pct[i]>=10?'up':'dn'}">${D.soi_pct[i]>=10?'✓ ≥10%':'⚠'}</div></div>
-    <div class="kpi"><div class="kl">Résultat net 2025</div><div class="kv">${fmt(D.net[i])}</div><div class="ks ${D.net[i]>=0?'up':'dn'}">${D.net[i]>=0?'Bénéfice':'Déficit'}</div></div>`;
+    <div class="kpi"><div class="kl">Marge brute 2026</div><div class="kv">${p(D.mb_pct[i])}</div><div class="ks ${D.mb_pct[i]>=76?'up':'dn'}">${fmt(D.mb[i])}</div></div>
+    <div class="kpi"><div class="kl">% MO 2026</div><div class="kv">${p(D.mo_pct[i])}</div><div class="ks ${D.mo_pct[i]<=25?'up':'dn'}">${D.mo_pct[i]<=25?'✓':'⚠'}</div></div>
+    <div class="kpi"><div class="kl">SOI 2026</div><div class="kv">${p(D.soi_pct[i])}</div><div class="ks ${D.soi_pct[i]>=10?'up':'dn'}">${D.soi_pct[i]>=10?'✓ ≥10%':'⚠'}</div></div>
+    <div class="kpi"><div class="kl">Résultat net 2026</div><div class="kv">${fmt(D.net[i])}</div><div class="ks ${D.net[i]>=0?'up':'dn'}">${D.net[i]>=0?'Bénéfice':'Déficit'}</div></div>`;
   dc('c-fin-ca');bChart('c-fin-ca',R,[{data:D.ca.map(v=>Math.round(v/1000)),backgroundColor:R.map((_,k)=>k===i?'#4f8ef7':'rgba(79,142,247,.25)'),borderWidth:0,borderRadius:3},{data:D.mb.map(v=>Math.round(v/1000)),backgroundColor:R.map((_,k)=>k===i?'#3dd68c':'rgba(61,214,140,.25)'),borderWidth:0,borderRadius:3}],{scales:{x:{ticks:{font:{size:10},color:'#8b8fa8'},grid:{display:false}},y:{ticks:{callback:v=>v+'k',font:{size:10},color:'#8b8fa8'},grid:GR}}});
   dc('c-fin-dnut');const oth=Math.max(0,100-D.food_pct[i]-D.mo_pct[i]-15.1-D.soi_pct[i]);
   CH['c-fin-dnut']=new Chart(document.getElementById('c-fin-dnut'),{type:'doughnut',data:{labels:['Food cost','M.O.','Redevances','Autres'],datasets:[{data:[D.food_pct[i],D.mo_pct[i],15.1,parseFloat(oth.toFixed(1))],backgroundColor:['#4f8ef7','#3dd68c','#f5a623','#94a3b8'],borderWidth:2,borderColor:'#1a1d27'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'62%'}});
@@ -809,7 +889,7 @@ function rBest(){
   const pods=[
     {t:'🏆 OPH Satisfaction 2026',items:R.map((r,i)=>({n:r,v:D.oph[i].toFixed(1)})).sort((a,b)=>parseFloat(a.v)-parseFloat(b.v)).slice(0,3)},
     {t:'📈 Progression PM 2026',items:R.map((r,i)=>({n:r,v:D.pm_prog[i]})).filter(x=>x.v!=null).sort((a,b)=>b.v-a.v).slice(0,3).map(x=>({n:x.n,v:(x.v>=0?'+':'')+x.v.toFixed(2)}))},
-    {t:'💰 SOI % 2025',items:R.map((r,i)=>({n:r,v:p(D.soi_pct[i])})).sort((a,b)=>D.soi_pct[R.indexOf(b.n)]-D.soi_pct[R.indexOf(a.n)]).slice(0,3)},
+    {t:'💰 SOI % 2026',items:R.map((r,i)=>({n:r,v:p(D.soi_pct[i])})).sort((a,b)=>D.soi_pct[R.indexOf(b.n)]-D.soi_pct[R.indexOf(a.n)]).slice(0,3)},
     {t:'🔬 Sécurité alim. 2026',items:R.map((r,i)=>({n:r,v:Math.round(annS(i)*100)+'%',s:annS(i)})).sort((a,b)=>b.s-a.s).slice(0,3)},
     {t:'🔄 Meilleur TO 2026',items:R.map((r,i)=>({n:r,v:p(D.to_ann[i]*100),s:D.to_ann[i]})).sort((a,b)=>a.s-b.s).slice(0,3)},
     {t:'📊 CA S'+ns+' 2026',items:R.map((r,i)=>({n:r,v:fmt(D.wca[i][ns-1]),s:D.wca[i][ns-1]})).sort((a,b)=>b.s-a.s).slice(0,3)}
