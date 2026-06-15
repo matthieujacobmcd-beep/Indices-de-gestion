@@ -179,22 +179,14 @@ window.addEventListener('load', function() {
 });
 </script>
 
-<div class="ov"
-
-<div class="ov" id="ov"><div class="spin"></div><div style="color:var(--txt2);font-size:13px" id="ovmsg">Chargement...</div></div>
-
 <div class="hdr">
-  <div>
-    <h1>Indices de Gestion <span class="badge">2026</span></h1>
-    <p id="finfo">Chargement automatique...</p>
-  </div>
+  <div><h1>Indices de Gestion <span class="badge">2026</span></h1><p id="finfo">Chargement automatique...</p></div>
   <div style="display:flex;align-items:center;gap:10px">
     <span class="fst" id="fst"></span>
     <button class="hbtn" onclick="document.getElementById('fi').click()">📂 Charger Excel</button>
     <input type="file" id="fi" accept=".xlsx,.xlsm,.xls" style="display:none" onchange="loadInput(this)">
   </div>
 </div>
-
 <div class="nav">
   <button class="nb active" onclick="go('acc')">🏠 Accueil</button>
   <button class="nb" onclick="go('fin')">📊 Financier</button>
@@ -206,10 +198,10 @@ window.addEventListener('load', function() {
   <button class="nb" onclick="go('syn')">📋 Synthèse</button>
   <button class="nb" onclick="go('best')">🥇 Best of</button>
 </div>
-
 <div class="cnt">
 
-<!-- WELCOME -->
+<div class="ov" id="ov"><div class="spin"></div><div style="color:var(--txt2);font-size:13px" id="ovmsg">Chargement...</div></div>
+
 <div id="welcome" class="welcome" style="display:none">
   <div class="dz" onclick="document.getElementById('fi').click()">
     <div class="ico">📊</div>
@@ -353,8 +345,26 @@ window.addEventListener('load', function() {
   <div class="fc"><div class="ct">Progression Plateau Moyen 2026</div><div class="tw"><table><thead><tr><th>Rang</th><th>Restaurant</th><th>Progression PM</th><th>Performance</th></tr></thead><tbody id="tb-pm"></tbody></table></div></div>
 </div>
 
-</div><!-- /panels -->
+</div>
+
 </div><!-- /cnt -->
+
+<!-- MODAL DETAIL GENERIQUE -->
+<div id="ca-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9000;overflow-y:auto;padding:20px">
+  <div style="max-width:900px;margin:0 auto;background:#1a1d27;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:24px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div><div style="font-size:16px;font-weight:600;color:#e8eaf0" id="ca-modal-title">Détail</div><div style="font-size:12px;color:#8b8fa8;margin-top:3px" id="ca-modal-sub">Comparaison 2025 vs 2026</div></div>
+      <button onclick="closeCAModal()" style="background:rgba(255,255,255,.08);border:none;color:#e8eaf0;width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer;font-family:inherit">✕</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button id="ca-btn-25" onclick="setCAYear(25)" style="padding:6px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#e8eaf0;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500">📊 2025</button>
+      <button id="ca-btn-26" onclick="setCAYear(26)" style="padding:6px 16px;border-radius:999px;border:1px solid #4f8ef7;background:rgba(79,142,247,.15);color:#4f8ef7;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500">📊 2026</button>
+      <button id="ca-btn-both" onclick="setCAYear('both')" style="padding:6px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#e8eaf0;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500">Comparer</button>
+    </div>
+    <div style="background:#0f1117;border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px;margin-bottom:16px"><div style="position:relative;height:260px"><canvas id="ca-chart"></canvas></div></div>
+    <div style="background:#0f1117;border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead id="ca-thead"></thead><tbody id="ca-tbody"></tbody></table></div>
+  </div>
+</div>
 
 <script>
 // ════════════════════════════════════════════
@@ -368,13 +378,13 @@ let D={
   // P&L 2026
   ca:[3025037,2094841,1778545,2304175,1384094,1427551,1375684,1200193],
   mb:[2273161,1571962,1357118,1733990,1043031,1078307,1037551,900481],
-  mb_pct:[76.3,76.7,77.1,76.6,76.2,76.3,76.1,76.1],
-  mo_pct:[24.4,23.6,25.3,23.9,25.9,24.8,26.4,26.4],
+  mb_pct:[76.31,76.66,77.1,76.65,76.16,76.3,76.15,76.11],
+  mo_pct:[24.41,23.65,25.33,23.94,25.88,24.81,26.44,26.4],
   food_pct:[20.5,20.4,20.3,20.1,20.9,20.7,21.0,20.8],
   pac:[1127775,778770,683764,845634,486012,538038,491707,395316],
-  pac_pct:[37.9,38.0,38.8,37.4,35.5,38.1,36.1,33.4],
+  pac_pct:[37.86,37.98,38.84,37.38,35.49,38.07,36.09,33.41],
   soi:[318507,232102,210368,145637,127672,200938,182915,24985],
-  soi_pct:[10.7,11.3,12.0,6.4,9.3,14.2,13.4,2.1],
+  soi_pct:[10.69,11.32,11.95,6.44,9.32,14.22,13.42,2.11],
   net:[99516,112562,104968,41361,54667,108303,96308,-22341],
   // CA 2026 Jan-Jun (lignes 4-9, cols 3,5,7,9,11,13,15,17 dans INDICES CA)
   ca26:[3158063,2407519,2066865,2512895,1452936,1595814,1543625,1308469].map((v,i)=>{
@@ -757,21 +767,53 @@ let accPeriod = 'ann'; // 'ann' | 'mois' | 'sem'
 // Données comparaison 2025
 // ── D25 = GLOBAL 25 = données 2025 clôturées ──
 const D25 = {
-  ca:    [3236964,2159841,1806719,2296967,1416396,1458782,1392956,1201006],
-  mb:    [2425886,1627153,1370634,1722124,1058089,1098938,1049266,898939],
-  mb_pct:[75.9,76.5,76.6,76.0,75.4,76.0,76.0,75.7],
-  mo:    [761477,491289,445440,517884,341440,352151,332387,356103],
-  mo_pct:[23.8,23.1,24.9,22.9,24.3,24.4,24.1,30.0],
-  pac:   [1225344,811314,703250,855773,519442,552108,526346,357574],
-  pac_pct:[38.3,38.1,39.3,37.8,37.0,38.2,38.1,30.1],
-  net:   [236337,139905,159612,67020,91318,150334,161094,-46325],
-  net_pct:[7.4,6.6,8.9,3.0,6.5,10.4,11.7,-3.9],
-  cf:    [514120,285057,306280,254090,180425,237142,232101,83705],
-  cf_pct:[16.1,13.4,17.1,11.2,12.9,16.4,16.8,7.0],
-  tacs:  [187132,132760,96507,133395,71236,77760,72541,67485]
+  ca:     [3236964,2159841,1806719,2296967,1416396,1458782,1392956,1201006],
+  mb:     [2425886,1627153,1370634,1722124,1058089,1098938,1049266,898939],
+  mb_pct: [75.90,76.49,76.57,76.01,75.41,76.00,75.95,75.66],
+  mo:     [761477,491289,445440,517884,341440,352151,332387,356103],
+  mo_pct: [23.82,23.09,24.88,22.86,24.33,24.35,24.06,29.97],
+  pac:    [1225344,811314,703250,855773,519442,552108,526346,357575],
+  pac_pct:[38.34,38.14,39.29,37.77,37.02,38.18,38.10,30.10],
+  soi:    [357654,221139,227754,153110,144821,205428,213583,-1094],
+  soi_pct:[11.19,10.40,12.72,6.76,10.32,14.21,15.46,-0.09],
+  cf:     [514120,285057,306280,254090,180425,237142,232101,83705],
+  cf_pct: [16.09,13.40,17.11,11.22,12.86,16.40,16.80,7.05],
+  net:    [142024,106700,121480,52036,70259,114521,122591,-46325],
+  net_pct:[4.44,5.02,6.79,2.30,5.01,7.92,8.87,-3.90],
+  tacs:   [187132,132760,96507,133395,71236,77760,72541,67485]
 };
 
 // Données mois glissant (Mai 2026 = dernier mois complet)
+// ════ DONNÉES MENSUELLES 2026 ════
+// CA mensuel [Jan,Fév,Mar,Avr,Mai,Juin]
+const CA26_M = [
+  [658679,607703,609515,581204,567959,132698],  // NORMAC
+  [384721,383625,385296,469413,471843,100619],  // TGM
+  [363719,339987,353333,351708,371145,86494],   // FLORJER
+  [493505,441461,471494,446988,450726,108212],  // BASARCHE
+  [276758,251484,281151,285322,288703,68517],   // CAMAIEU
+  [287700,267583,292365,283216,297095,67855],   // GLENANS
+  [289041,275547,279943,261666,269488,66935],   // JARV
+  [253416,220558,238670,238954,248595,58276]    // THENALAC
+];
+// CA mensuel 2025 par restaurant (calculé depuis % dans INDICES CA)
+const CA25_M = [
+  [684831,628192,647614,636163,631096,142119],  // NORMAC
+  [383296,382646,407028,493533,483052,103573],  // TGM
+  [345612,348588,359550,378533,371054,91560],   // FLORJER
+  [474662,437259,459551,463871,460815,116437],  // BASARCHE
+  [262425,259310,281169,303563,305899,71366],   // CAMAIEU
+  [277790,271405,290546,302152,313562,76739],   // GLENANS
+  [283201,276932,278861,280718,272348,62765],   // JARV
+  [241814,226023,237729,248494,246483,58300]    // THENALAC (Juin estimé)
+];
+const TACS26_M=[[25346,28087,32780,24922,30142,6425],[15686,18388,22250,22426,27539,5146],[12990,14480,17348,13835,17950,3852],[19002,20264,25143,19146,24198,5214],[9267,10189,13174,10580,13097,2825],[10205,11477,14342,11274,14310,3035],[10169,11706,13838,10300,13135,2818],[9426,10156,12343,9654,12329,2650]];
+const MB26_M=[[76.06,76.63,76.46,76.71,75.68,76.31],[76.56,77.30,76.62,76.91,76.03,76.66],[76.98,77.18,77.07,77.52,76.77,77.10],[76.33,76.94,77.18,77.03,75.78,76.65],[75.88,76.01,76.35,76.86,75.68,76.16],[75.95,76.51,76.76,76.72,75.58,76.30],[75.91,76.46,76.18,75.89,76.30,76.15],[75.51,76.01,76.49,76.48,76.09,76.11]];
+const VPHEQ26_M=[[104.2,105.0,97.2,100.8,97.0,98.7],[101.4,100.2,97.2,108.0,101.9,88.1],[100.1,96.4,95.8,95.5,102.3,89.2],[97.6,97.1,95.7,97.6,86.5,95.3],[94.2,100.1,101.5,103.9,102.5,110.8],[94.1,97.3,110.0,106.0,94.7,105.2],[98.1,98.9,94.9,93.1,98.9,100.4],[93.3,88.5,100.0,103.0,102.1,98.7]];
+const TCHE26_M=[[5.47,5.45,5.21,5.35,5.30,5.46],[5.61,5.65,5.54,6.37,6.18,5.24],[4.81,4.61,4.63,4.68,5.08,4.54],[5.15,5.08,5.11,5.25,4.76,5.29],[4.24,4.60,4.64,4.74,4.76,5.16],[4.49,4.75,5.30,5.19,4.67,5.30],[4.71,4.71,4.59,4.57,4.89,4.84],[4.76,4.55,5.18,5.23,5.24,5.08]];
+const UVHE26_M=[[36.35,34.95,32.91,35.22,34.79,34.87],[33.69,33.55,32.32,36.25,37.02,29.73],[33.35,32.27,31.01,31.29,34.96,31.23],[33.42,32.68,33.18,33.95,31.80,34.18],[30.72,33.57,31.36,34.32,35.58,33.83],[33.10,33.05,36.64,35.10,34.45,36.14],[33.09,33.57,31.30,30.89,32.10,32.17],[29.38,27.04,29.81,31.32,33.20,32.34]];
+const LAD26_M=[[66598,52717,57112,48975,52057,0],[56370,48620,46532,42420,48554,0],[0,4805,6922,6539,7343,0],[79727,67559,69934,58122,66710,0],[0,0,0,0,937,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[20922,19036,18495,16521,19922,0]];
+
 const DMOIS = {
   ca:    [567959,471843,371145,450726,288703,297095,269488,248595],
   mb:    [75.68,76.03,76.77,75.78,75.68,75.58,76.3,76.09],
@@ -891,36 +933,40 @@ function renderAccBtns(idx, period) {
     var tc26=gv(DMOIS.tacs&&DSEM.tacs?[165462,124446,89876,126739,65803,72093,69284,63595]:D.ca,idx,'sum');
     var tacs26=[165462,124446,89876,126739,65803,72093,69284,63595];
     var tc=gv(tacs26,idx,'sum'), tc25=gv(D25.tacs,idx,'sum');
-    var mb26=gv(D.mb_pct,idx,'avg'), mb25=gv(D25.mb,idx,'avg');
-    var pac26=gv(D.pac_pct,idx,'avg'), pac25=gv(D25.pac,idx,'avg');
+    var mb26=gv(D.mb_pct,idx,'avg'), mb25=gv(D25.mb_pct,idx,'avg');
+    var pac26=gv(D.pac_pct,idx,'avg'), pac25=gv(D25.pac_pct,idx,'avg');
     var net26=gv(D.net,idx,'sum'), net25=gv(D25.net,idx,'sum');
     var cf26=gv([462384,262550,295283,244093,151925,229414,200025,124195],idx,'sum'), cf25=gv(D25.cf,idx,'sum');
-    html += mkBtn('CA Annuel 2026',fmt(ca26),'<span class="kbtn-ref">2025 : '+fmt(ca25)+'</span> '+mkD(ca26,ca25,false,false),'blue',vc(ca26-ca25,0,null));
-    html += mkBtn("TAC'S Annuel",tc.toLocaleString('fr-FR'),'<span class="kbtn-ref">2025 : '+tc25.toLocaleString('fr-FR')+'</span> '+mkD(tc,tc25,false,false),'blue',vc(tc-tc25,0,null));
-    html += mkBtn('Marge Brute',mb26.toFixed(1)+'%','<span class="kbtn-ref">2025 : '+mb25.toFixed(1)+'%</span> '+mkD(mb26,mb25,false,true),'blue',vc(mb26,76,74));
-    html += mkBtn('PAC',pac26.toFixed(1)+'%','<span class="kbtn-ref">2025 : '+pac25.toFixed(1)+'%</span> '+mkD(pac26,pac25,false,true),'blue',vc(pac26,35,33));
-    html += mkBtn('Résultat Net',fmt(net26),'<span class="kbtn-ref">2025 : '+fmt(net25)+'</span> '+mkD(net26,net25,false,false),'blue',net26>=0?'ok':'bad');
-    html += mkBtn('Cash Flow',fmt(cf26),'<span class="kbtn-ref">2025 : '+fmt(cf25)+'</span> '+mkD(cf26,cf25,false,false),'blue',vc(cf26-cf25,0,null));
+    html += '<div class="kbtn blue" onclick="openCAModal('+idx+')" style="cursor:pointer">'
+    +'<div class="kbtn-label">CA Annuel 2026 <span style="font-size:10px;opacity:.6">↗</span></div>'
+    +'<div class="kbtn-value '+(ca26>=ca25?'ok':'bad')+'">'+fmt(ca26)+'</div>'
+    +'<div class="kbtn-sub"><span class="kbtn-ref">2025 : '+fmt(ca25)+'</span> '+mkD(ca26,ca25,false,false)+'</div>'
+    +'</div>';
+    html += '<div class="kbtn blue" onclick="openDetailModal(\'tacs\','+idx+')" style="cursor:pointer"><div class="kbtn-label">TAC\'S Annuel ↗</div><div class="kbtn-value '+(tc>=tc25?'ok':'bad')+'">'+tc.toLocaleString('fr-FR')+'</div><div class="kbtn-sub"><span class="kbtn-ref">2025 : '+tc25.toLocaleString('fr-FR')+'</span> '+mkD(tc,tc25,false,false)+'</div></div>';
+    html += '<div class="kbtn blue" onclick="openDetailModal('mb','+idx+')" style="cursor:pointer"><div class="kbtn-label">Marge Brute <span style="font-size:10px;opacity:.6">↗</span></div><div class="kbtn-value '+vc(mb26,76,74)+'">'+mb26.toFixed(1)+'%</div><div class="kbtn-sub"><span class="kbtn-ref">2025 : '+mb25.toFixed(1)+'%</span> '+mkD(mb26,mb25,false,true)+'</div></div>';
+    html += '<div class="kbtn blue" onclick="openDetailModal('pac','+idx+')" style="cursor:pointer"><div class="kbtn-label">PAC <span style="font-size:10px;opacity:.6">↗</span></div><div class="kbtn-value '+vc(pac26,35,33)+'">'+pac26.toFixed(1)+'%</div><div class="kbtn-sub"><span class="kbtn-ref">2025 : '+pac25.toFixed(1)+'%</span> '+mkD(pac26,pac25,false,true)+'</div></div>';
+    html += '<div class="kbtn blue" onclick="openDetailModal('net','+idx+')" style="cursor:pointer"><div class="kbtn-label">Résultat Net <span style="font-size:10px;opacity:.6">↗</span></div><div class="kbtn-value '+(net26>=0?'ok':'bad')+'">'+fmt(net26)+'</div><div class="kbtn-sub"><span class="kbtn-ref">2025 : '+fmt(net25)+'</span> '+mkD(net26,net25,false,false)+'</div></div>';
+    html += '<div class="kbtn blue" onclick="openDetailModal('cf','+idx+')" style="cursor:pointer"><div class="kbtn-label">Cash Flow <span style="font-size:10px;opacity:.6">↗</span></div><div class="kbtn-value '+vc(cf26-cf25,0,null)+'">'+fmt(cf26)+'</div><div class="kbtn-sub"><span class="kbtn-ref">2025 : '+fmt(cf25)+'</span> '+mkD(cf26,cf25,false,false)+'</div></div>';
   } else if (isMois) {
     var cam=gv(DMOIS.ca,idx,'sum');
     var caRef=gv(D.ca,idx,'sum'); // Annuel comme référence
     var mbm=gv(DMOIS.mb,idx,'avg');
-    html += mkBtn('CA Mai 2026',fmt(cam),'<span class="kbtn-ref">Annuel : '+fmt(caRef)+'</span>','blue','');
-    html += mkBtn("TAC'S",na(),'<span class="kbtn-ref">Données annuelles uniquement</span>','blue','');
-    html += mkBtn('Marge Brute',mbm.toFixed(1)+'%','<span class="kbtn-ref">Annuel : '+gv(D.mb_pct,idx,'avg').toFixed(1)+'%</span> '+mkD(mbm,gv(D.mb_pct,idx,'avg'),false,true),'blue',vc(mbm,76,74));
-    html += mkBtn('PAC',na(),'<span class="kbtn-ref">Données annuelles uniquement</span>','blue','');
-    html += mkBtn('Résultat Net',na(),'<span class="kbtn-ref">Données annuelles uniquement</span>','blue','');
-    html += mkBtn('Cash Flow',na(),'<span class="kbtn-ref">Données annuelles uniquement</span>','blue','');
+    html += '<div class="kbtn blue" onclick="openDetailModal(\'ca\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">CA Mai 2026 ↗</div><div class="kbtn-value">' + fmt(cam) + '</div><div class="kbtn-sub"><span class="kbtn-ref">Annuel : ' + fmt(caRef) + '</span></div></div>';
+    html += '<div class="kbtn blue" onclick="openDetailModal(\'tacs\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">TAC\'S ↗</div><div class="kbtn-value">—</div><div class="kbtn-sub"><span class="kbtn-ref">Voir données annuelles</span></div></div>';
+    html += '<div class="kbtn blue" onclick="openDetailModal(\'mb\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">Marge Brute ↗</div><div class="kbtn-value ' + vc(mbm,76,74) + '">' + mbm.toFixed(1) + '%</div><div class="kbtn-sub"><span class="kbtn-ref">Annuel : ' + gv(D.mb_pct,idx,'avg').toFixed(1) + '%</span></div></div>';
+    html += '<div class="kbtn blue" onclick="openDetailModal(\'pac\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">PAC ↗</div><div class="kbtn-value">—</div><div class="kbtn-sub"><span class="kbtn-ref">Voir données annuelles</span></div></div>';
+    html += '<div class="kbtn blue" onclick="openDetailModal(\'net\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">Résultat Net ↗</div><div class="kbtn-value">—</div><div class="kbtn-sub"><span class="kbtn-ref">Voir données annuelles</span></div></div>';
+    html += '<div class="kbtn blue" onclick="openDetailModal(\'cf\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">Cash Flow ↗</div><div class="kbtn-value">—</div><div class="kbtn-sub"><span class="kbtn-ref">Voir données annuelles</span></div></div>';
   } else { // semaine
     var cas=D.wca[idx===-1?0:idx][D.wca[0].length-1];
     if(isFr) { cas=0; for(var xi=0;xi<8;xi++) cas+=D.wca[xi][D.wca[xi].length-1]; }
     var tcas=gv(DSEM.tacs,idx,'sum');
-    html += mkBtn('CA S'+D.wca[0].length,fmt(cas),'<span class="kbtn-ref">Dernière semaine</span>','blue','');
-    html += mkBtn("TAC'S S"+D.wca[0].length,tcas.toLocaleString('fr-FR'),'<span class="kbtn-ref">Dernière semaine</span>','blue','');
-    html += mkBtn('Marge Brute',na(),'<span class="kbtn-ref">Données mensuelles/annuelles</span>','blue','');
-    html += mkBtn('PAC',na(),'<span class="kbtn-ref">Données annuelles uniquement</span>','blue','');
-    html += mkBtn('Résultat Net',na(),'<span class="kbtn-ref">Données annuelles uniquement</span>','blue','');
-    html += mkBtn('Cash Flow',na(),'<span class="kbtn-ref">Données annuelles uniquement</span>','blue','');
+    html += '<div class="kbtn blue" onclick="openDetailModal(\'ca\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">CA S' + D.wca[0].length + ' ↗</div><div class="kbtn-value">' + fmt(cas) + '</div><div class="kbtn-sub"><span class="kbtn-ref">Dernière semaine</span></div></div>';
+    html += '<div class="kbtn blue" onclick="openDetailModal(\'tacs\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">TAC\'S S' + D.wca[0].length + ' ↗</div><div class="kbtn-value">' + tcas.toLocaleString('fr-FR') + '</div><div class="kbtn-sub"><span class="kbtn-ref">Dernière semaine</span></div></div>';
+    html += '<div class="kbtn blue" onclick="openDetailModal(\'mb\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">Marge Brute ↗</div><div class="kbtn-value">—</div><div class="kbtn-sub"><span class="kbtn-ref">Voir données mensuelles</span></div></div>';
+    html += '<div class="kbtn blue" onclick="openDetailModal(\'pac\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">PAC ↗</div><div class="kbtn-value">—</div><div class="kbtn-sub"><span class="kbtn-ref">Voir données annuelles</span></div></div>';
+    html += '<div class="kbtn blue" onclick="openDetailModal(\'net\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">Résultat Net ↗</div><div class="kbtn-value">—</div><div class="kbtn-sub"><span class="kbtn-ref">Voir données annuelles</span></div></div>';
+    html += '<div class="kbtn blue" onclick="openDetailModal(\'cf\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">Cash Flow ↗</div><div class="kbtn-value">—</div><div class="kbtn-sub"><span class="kbtn-ref">Voir données annuelles</span></div></div>';
   }
   html += '</div></div>';
 
@@ -931,27 +977,27 @@ function renderAccBtns(idx, period) {
     var vphA=gv([98.7,88.1,89.2,95.4,110.8,105.2,100.4,98.7],idx,'avg');
     var tcheA=gv([5.46,5.24,4.54,5.29,5.16,5.30,4.84,5.08],idx,'avg');
     var uvheA=gv([34.87,29.73,31.23,34.18,33.83,36.14,32.17,28.90],idx,'avg');
-    html += mkBtn('Turn Over Annuel',p(toA*100),'<span class="kbtn-ref">Seuil : &lt;25% bon · &gt;50% élevé</span>','orange',toA<0.25?'ok':toA<0.5?'warn':'bad');
-    html += mkBtn('VPHE Équipier',vphA.toFixed(1),'<span class="kbtn-ref">Obj. ≥ 100 — Juin 2026</span>','orange',vc(vphA,100,90));
-    html += mkBtn('TCHE Équipier',tcheA.toFixed(2),'<span class="kbtn-ref">Juin 2026</span>','orange','');
-    html += mkBtn('UVHE Équipier',uvheA.toFixed(2),'<span class="kbtn-ref">Juin 2026</span>','orange','');
+    html += '<div class="kbtn orange" onclick="openDetailModal(\'to\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">Turn Over Annuel ↗</div><div class="kbtn-value ' + (toA<0.25?'ok':toA<0.5?'warn':'bad') + '">' + p(toA*100) + '</div><div class="kbtn-sub"><span class="kbtn-ref">Seuil : &lt;25% / &gt;50%</span></div></div>';
+    html += '<div class="kbtn orange" onclick="openDetailModal(\'vpheq\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">VPHE Équipier ↗</div><div class="kbtn-value ' + vc(vphA,100,90) + '">' + vphA.toFixed(1) + '</div><div class="kbtn-sub"><span class="kbtn-ref">Obj. ≥ 100</span></div></div>';
+    html += '<div class="kbtn orange" onclick="openDetailModal(\'tche\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">TCHE Équipier ↗</div><div class="kbtn-value">' + tcheA.toFixed(2) + '</div><div class="kbtn-sub"><span class="kbtn-ref">Évolution mensuelle</span></div></div>';
+    html += '<div class="kbtn orange" onclick="openDetailModal(\'uvhe\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">UVHE Équipier ↗</div><div class="kbtn-value">' + uvheA.toFixed(2) + '</div><div class="kbtn-sub"><span class="kbtn-ref">Évolution mensuelle</span></div></div>';
   } else if (isMois) {
     var toA2=gv(D.to_ann,idx,'avg');
     var vphM=gv(DMOIS.vph_g,idx,'avg');
     var tcheM=gv(DMOIS.tche,idx,'avg');
     var uvheM=gv(DMOIS.uvhe,idx,'avg');
     var vpheM=gv(DMOIS.vphe,idx,'avg');
-    html += mkBtn('Turn Over Annuel',p(toA2*100),'<span class="kbtn-ref">Seuil : &lt;25% / &gt;50%</span>','orange',toA2<0.25?'ok':toA2<0.5?'warn':'bad');
-    html += mkBtn('VPHE Équipier',vpheM.toFixed(1),'<span class="kbtn-ref">Obj. ≥ 100 — Mai 2026</span>','orange',vc(vpheM,100,90));
-    html += mkBtn('TCHE Équipier',tcheM.toFixed(2),'<span class="kbtn-ref">Mai 2026</span>','orange','');
-    html += mkBtn('UVHE Équipier',uvheM.toFixed(2),'<span class="kbtn-ref">Mai 2026</span>','orange','');
+    html += '<div class="kbtn orange" onclick="openDetailModal(\'to\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">Turn Over Annuel ↗</div><div class="kbtn-value ' + (toA2<0.25?'ok':toA2<0.5?'warn':'bad') + '">' + p(toA2*100) + '</div><div class="kbtn-sub"><span class="kbtn-ref">Seuil : &lt;25% / &gt;50%</span></div></div>';
+    html += '<div class="kbtn orange" onclick="openDetailModal(\'vpheq\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">VPHE Équipier ↗</div><div class="kbtn-value ' + vc(vpheM,100,90) + '">' + vpheM.toFixed(1) + '</div><div class="kbtn-sub"><span class="kbtn-ref">Obj. ≥ 100</span></div></div>';
+    html += '<div class="kbtn orange" onclick="openDetailModal(\'tche\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">TCHE Équipier ↗</div><div class="kbtn-value">' + tcheM.toFixed(2) + '</div><div class="kbtn-sub"><span class="kbtn-ref">Évolution mensuelle</span></div></div>';
+    html += '<div class="kbtn orange" onclick="openDetailModal(\'uvhe\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">UVHE Équipier ↗</div><div class="kbtn-value">' + uvheM.toFixed(2) + '</div><div class="kbtn-sub"><span class="kbtn-ref">Évolution mensuelle</span></div></div>';
   } else {
     var toA3=gv(D.to_ann,idx,'avg');
     var vpheS=gv(DSEM.vphe,idx,'avg');
-    html += mkBtn('Turn Over Annuel',p(toA3*100),'<span class="kbtn-ref">Seuil : &lt;25% / &gt;50%</span>','orange',toA3<0.25?'ok':toA3<0.5?'warn':'bad');
-    html += mkBtn('VPHE Équipier',vpheS.toFixed(1),'<span class="kbtn-ref">Obj. ≥ 100 — S'+D.wca[0].length+'</span>','orange',vc(vpheS,100,90));
-    html += mkBtn('TCHE Équipier',na(),'<span class="kbtn-ref">Données mensuelles/annuelles</span>','orange','');
-    html += mkBtn('UVHE Équipier',na(),'<span class="kbtn-ref">Données mensuelles/annuelles</span>','orange','');
+    html += '<div class="kbtn orange" onclick="openDetailModal(\'to\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">Turn Over Annuel ↗</div><div class="kbtn-value ' + (toA3<0.25?'ok':toA3<0.5?'warn':'bad') + '">' + p(toA3*100) + '</div><div class="kbtn-sub"><span class="kbtn-ref">Seuil : &lt;25% / &gt;50%</span></div></div>';
+    html += '<div class="kbtn orange" onclick="openDetailModal(\'vpheq\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">VPHE Équipier ↗</div><div class="kbtn-value ' + vc(vpheS,100,90) + '">' + vpheS.toFixed(1) + '</div><div class="kbtn-sub"><span class="kbtn-ref">Obj. ≥ 100</span></div></div>';
+    html += '<div class="kbtn orange" onclick="openDetailModal(\'tche\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">TCHE Équipier ↗</div><div class="kbtn-value">—</div><div class="kbtn-sub"><span class="kbtn-ref">Voir données mensuelles</span></div></div>';
+    html += '<div class="kbtn orange" onclick="openDetailModal(\'uvhe\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">UVHE Équipier ↗</div><div class="kbtn-value">—</div><div class="kbtn-sub"><span class="kbtn-ref">Voir données mensuelles</span></div></div>';
   }
   html += '</div></div>';
 
@@ -966,9 +1012,9 @@ function renderAccBtns(idx, period) {
   var ophM2=isFr?DMOIS.oph.filter(function(v){return v!=null;}).reduce(function(s,v){return s+v;},0)/DMOIS.oph.filter(function(v){return v!=null;}).length:DMOIS.oph[idx];
   var ophA2=gv(DMOIS.oph_a,idx,'avg');
   if (isSem) {
-    html += mkBtn('OEPE Drive',na(),'<span class="kbtn-ref">Données mensuelles/annuelles</span>','green','');
-    html += mkBtn('R2P Salle',na(),'<span class="kbtn-ref">Données mensuelles/annuelles</span>','green','');
-    html += mkBtn('OPH',na(),'<span class="kbtn-ref">Données mensuelles/annuelles</span>','green','');
+    html += '<div class="kbtn green" onclick="openDetailModal(\'oepe\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">OEPE Drive ↗</div><div class="kbtn-value">—</div><div class="kbtn-sub"><span class="kbtn-ref">Voir détail</span></div></div>';
+    html += '<div class="kbtn green" onclick="openDetailModal(\'r2p\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">R2P Salle ↗</div><div class="kbtn-value">—</div><div class="kbtn-sub"><span class="kbtn-ref">Voir détail</span></div></div>';
+    html += '<div class="kbtn green" onclick="openDetailModal(\'oph\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">OPH ↗</div><div class="kbtn-value">—</div><div class="kbtn-sub"><span class="kbtn-ref">Voir détail</span></div></div>';
   } else {
     var oepeVal = isAnn ? Math.round(oepeA2) : Math.round(oepeM2);
     var r2pVal  = isAnn ? Math.round(r2pA2)  : Math.round(r2pM2);
@@ -976,9 +1022,9 @@ function renderAccBtns(idx, period) {
     var r2pRef  = isAnn ? 'Obj. ≤'+Math.round(r2pO)+'s'  : 'Annuel : '+Math.round(r2pA2)+'s · Obj. ≤'+Math.round(r2pO)+'s';
     var ophVal2 = ophM2!=null ? ophM2.toFixed(1) : '—';
     var ophRef  = isAnn ? 'Annuel · Obj. ≤50' : 'Annuel : '+ophA2.toFixed(1)+' · Obj. ≤50';
-    html += mkBtn('OEPE Drive',oepeVal+'s','<span class="kbtn-ref">'+oepeRef+'</span>','green',vcMax(oepeVal,oepeO,oepeO*1.15));
-    html += mkBtn('R2P Salle',r2pVal+'s','<span class="kbtn-ref">'+r2pRef+'</span>','green',vcMax(r2pVal,r2pO,r2pO*1.15));
-    html += mkBtn('OPH',ophVal2,'<span class="kbtn-ref">'+ophRef+'</span>','green',ophM2!=null?vcMax(ophM2,50,70):'');
+    html += '<div class="kbtn green" onclick="openDetailModal(\'oepe\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">OEPE Drive ↗</div><div class="kbtn-value ' + vcMax(oepeVal,oepeO,oepeO*1.15) + '">' + oepeVal + 's</div><div class="kbtn-sub"><span class="kbtn-ref">' + oepeRef + '</span></div></div>';
+    html += '<div class="kbtn green" onclick="openDetailModal(\'r2p\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">R2P Salle ↗</div><div class="kbtn-value ' + vcMax(r2pVal,r2pO,r2pO*1.15) + '">' + r2pVal + 's</div><div class="kbtn-sub"><span class="kbtn-ref">' + r2pRef + '</span></div></div>';
+    html += '<div class="kbtn green" onclick="openDetailModal(\'oph\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">OPH ↗</div><div class="kbtn-value ' + (ophM2!=null?vcMax(ophM2,50,70):'') + '">' + ophVal2 + '</div><div class="kbtn-sub"><span class="kbtn-ref">' + ophRef + '</span></div></div>';
   }
   html += '</div></div>';
 
@@ -987,9 +1033,9 @@ function renderAccBtns(idx, period) {
   var hmV=gv(DMOIS.hm,idx,'avg');
   var rsV=gv(DMOIS.rs,idx,'avg');
   var ladV=gv(DMOIS.lad,idx,'avg');
-  html += mkBtn('Hello McDo',(hmV*100).toFixed(1)+'%','<span class="kbtn-ref">Obj. ≥ 90%'+(isSem?' — Données mensuelles':' — Mois en cours')+'</span>','purple',vc(hmV,0.9,0.85));
-  html += mkBtn('Réseaux Sociaux',rsV.toFixed(1)+'/5','<span class="kbtn-ref">Obj. ≥ 3.3'+(isSem?' — Données mensuelles':'')+'</span>','purple',vc(rsV,4.3,3.3));
-  html += mkBtn('% LAD / CA',ladV.toFixed(1)+'%','<span class="kbtn-ref">Uber Direct</span>','purple','');
+  html += '<div class="kbtn purple" onclick="openDetailModal(\'hm\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">Hello McDo ↗</div><div class="kbtn-value ' + vc(hmV,0.9,0.85) + '">' + (hmV*100).toFixed(1) + '%</div><div class="kbtn-sub"><span class="kbtn-ref">Obj. ≥ 90%</span></div></div>';
+  html += '<div class="kbtn purple" onclick="openDetailModal(\'rs\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">Réseaux Sociaux ↗</div><div class="kbtn-value ' + vc(rsV,4.3,3.3) + '">' + rsV.toFixed(1) + '/5</div><div class="kbtn-sub"><span class="kbtn-ref">Obj. ≥ 3.3</span></div></div>';
+  html += '<div class="kbtn purple" onclick="openDetailModal(\'lad\',' + idx + ')" style="cursor:pointer"><div class="kbtn-label">% LAD / CA ↗</div><div class="kbtn-value">' + ladV.toFixed(1) + '%</div><div class="kbtn-sub"><span class="kbtn-ref">Uber Direct</span></div></div>';
   html += '</div></div>';
 
   el.innerHTML = html;
@@ -1222,22 +1268,189 @@ function rBest(){
 // ════════════════════════════════════════
 // DRAG & DROP
 // ════════════════════════════════════════
-document.addEventListener('dragover',e=>e.preventDefault());
-document.addEventListener('drop',e=>{
-  e.preventDefault();
-  const f=e.dataTransfer.files[0];
-  if(f&&(f.name.endsWith('.xlsx')||f.name.endsWith('.xlsm'))){
-    showOv('Lecture de '+f.name+'...');
-    const reader=new FileReader();
-    reader.onload=ev=>{try{const wb=XLSX.read(ev.target.result,{type:'binary',cellFormula:false,cellHTML:false});parseWB(wb,f.name);}catch(err){hideOv();}};
-    reader.readAsBinaryString(f);
-  }
-});
 
-// ════════════════════════════════════════
-// DÉMARRAGE
-// ════════════════════════════════════════
-// Chargement géré par loginSuccess()
+// ── MODAL DETAIL GENERIQUE ──
+var detailModalIdx = -1;
+var detailModalKey = 'ca';
+var detailChartInst = null;
+var detailYear = 'both';
+// Alias pour compatibilité CA modal
+var caModalIdx = -1; var caModalYear = 'both'; var caChartInst = null;
+function openCAModal(idx){ openDetailModal('ca', idx); }
+
+// Config des indicateurs
+var INDIC = {
+  ca:    {label:'CA',          unit:'€',   fmt:'money', color:'#4f8ef7', data26:CA26_M,   data25:CA25_M,   hasM:true,  has25:true,  obj:null,    inv:false},
+  tacs:  {label:"TAC'S",       unit:'',    fmt:'int',   color:'#4f8ef7', data26:TACS26_M, data25:null,     hasM:true,  has25:false, obj:null,    inv:false},
+  mb:    {label:'Marge Brute', unit:'%',   fmt:'pct',   color:'#3dd68c', data26:MB26_M,   data25:null,     hasM:true,  has25:true,  obj:76,      inv:false, annD26:D.mb_pct, annD25:D25.mb_pct},
+  pac:   {label:'PAC',         unit:'%',   fmt:'pct',   color:'#4f8ef7', data26:null,     data25:null,     hasM:false, has25:true,  obj:35,      inv:false, annD26:D.pac_pct, annD25:D25.pac_pct},
+  net:   {label:'Résultat Net',unit:'€',   fmt:'money', color:'#3dd68c', data26:null,     data25:null,     hasM:false, has25:true,  obj:0,       inv:false, annD26:D.net, annD25:D25.net},
+  cf:    {label:'Cash Flow',   unit:'€',   fmt:'money', color:'#2dd4bf', data26:null,     data25:null,     hasM:false, has25:true,  obj:null,    inv:false, annD26:[462384,262550,295283,244093,151925,229414,200025,124195], annD25:D25.cf},
+  to:    {label:'Turn Over',   unit:'%',   fmt:'pct1',  color:'#f5a623', data26:null,     data25:null,     hasM:false, has25:false, obj:25,      inv:true,  annD26:D.to_ann.map(function(v){return parseFloat((v*100).toFixed(1));}), annD25:null},
+  vpheq: {label:'VPHE Équip.', unit:'',    fmt:'num1',  color:'#f5a623', data26:VPHEQ26_M,data25:null,     hasM:true,  has25:false, obj:100,     inv:false},
+  tche:  {label:'TCHE',        unit:'',    fmt:'num2',  color:'#f5a623', data26:TCHE26_M, data25:null,     hasM:true,  has25:false, obj:null,    inv:false},
+  uvhe:  {label:'UVHE',        unit:'',    fmt:'num2',  color:'#f5a623', data26:UVHE26_M, data25:null,     hasM:true,  has25:false, obj:null,    inv:false},
+  oepe:  {label:'OEPE Drive',  unit:'s',   fmt:'int',   color:'#3dd68c', data26:null,     data25:null,     hasM:false, has25:false, obj:null,    inv:true,  annD26:D.oepe_ann, moisD26:D.oepe_m, annObj:D.oepe_obj},
+  r2p:   {label:'R2P Salle',   unit:'s',   fmt:'int',   color:'#3dd68c', data26:null,     data25:null,     hasM:false, has25:false, obj:null,    inv:true,  annD26:D.r2p_ann,  moisD26:D.r2p_m,  annObj:D.r2p_obj},
+  oph:   {label:'OPH',         unit:'',    fmt:'num1',  color:'#3dd68c', data26:null,     data25:null,     hasM:false, has25:false, obj:50,      inv:true,  annD26:D.oph, moisD26:[41.5,17.0,23.0,101.9,31.8,88.9,31.3,null]},
+  hm:    {label:'Hello McDo',  unit:'%',   fmt:'pct1',  color:'#a78bfa', data26:null,     data25:null,     hasM:false, has25:false, obj:90,      inv:false, annD26:D.hm_m.map(function(v){return parseFloat((v*100).toFixed(1));}), annD25:D.hm_a.map(function(v){return parseFloat((v*100).toFixed(1));})},
+  rs:    {label:'Réseaux Soc.',unit:'/5',  fmt:'num1',  color:'#a78bfa', data26:null,     data25:null,     hasM:false, has25:false, obj:3.3,     inv:false, annD26:D.rs_m, annD25:null},
+  lad:   {label:'% LAD/CA',    unit:'%',   fmt:'pct1',  color:'#a78bfa', data26:LAD26_M,  data25:null,     hasM:true,  has25:false, obj:null,    inv:false, isLadPct:true}
+};
+
+function fmtV(v, fmt, unit) {
+  if (v==null||isNaN(v)) return '—';
+  var s;
+  if (fmt==='money') s = Math.round(v).toLocaleString('fr-FR')+'€';
+  else if (fmt==='pct')  s = v.toFixed(1)+'%';
+  else if (fmt==='pct1') s = v.toFixed(1)+(unit||'%');
+  else if (fmt==='num1') s = v.toFixed(1)+(unit||'');
+  else if (fmt==='num2') s = v.toFixed(2)+(unit||'');
+  else s = Math.round(v).toLocaleString('fr-FR')+(unit||'');
+  return s;
+}
+
+function openDetailModal(key, idx) {
+  detailModalKey = key; detailModalIdx = idx; detailYear = 'both';
+  var cfg = INDIC[key];
+  var title = idx===-1 ? 'Franchise' : R[idx];
+  document.getElementById('ca-modal-title').textContent = cfg.label+' — '+title;
+  document.getElementById('ca-modal-sub').textContent = cfg.hasM ? 'Évolution mensuelle Jan→Juin 2026' : 'Comparaison par restaurant';
+  document.getElementById('ca-modal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  // Boutons année
+  document.getElementById('ca-btn-25').style.display = cfg.has25 ? '' : 'none';
+  document.getElementById('ca-btn-both').style.display = cfg.has25 ? '' : 'none';
+  if (!cfg.has25) detailYear = 26;
+  renderDetailModal();
+}
+
+function closeCAModal() {
+  document.getElementById('ca-modal').style.display = 'none';
+  document.body.style.overflow = '';
+  if (detailChartInst) { detailChartInst.destroy(); detailChartInst = null; }
+}
+
+function setCAYear(y) { detailYear = y; updateCABtns(); renderDetailModal(); }
+function updateCABtns() {
+  ['25','26','both'].forEach(function(k){
+    var btn = document.getElementById('ca-btn-'+k);
+    if (!btn||btn.style.display==='none') return;
+    var active = String(k)===String(detailYear);
+    btn.style.background = active?'rgba(79,142,247,.3)':'rgba(255,255,255,.08)';
+    btn.style.borderColor = active?'#4f8ef7':'rgba(255,255,255,.2)';
+    btn.style.color = active?'#4f8ef7':'#e8eaf0';
+  });
+}
+
+function getMonthlyData(arr, idx) {
+  if (!arr) return [0,0,0,0,0,0];
+  if (idx===-1) return [0,1,2,3,4,5].map(function(mi){return arr.reduce(function(s,r){return s+(r[mi]||0);},0);});
+  return arr[idx]||[0,0,0,0,0,0];
+}
+
+function getAnnualData(arr) {
+  if (!arr) return R.map(function(){return 0;});
+  return R.map(function(_,i){return arr[i]||0;});
+}
+
+function renderDetailModal() {
+  var cfg = INDIC[detailModalKey];
+  var idx = detailModalIdx;
+  var MTHS6 = ['Jan','Fév','Mar','Avr','Mai','Juin'];
+  if (detailChartInst) { detailChartInst.destroy(); detailChartInst = null; }
+
+  if (cfg.hasM) {
+    // ── Mode mensuel ──
+    var d26 = getMonthlyData(cfg.data26, idx);
+    var d25 = cfg.data25 ? getMonthlyData(cfg.data25, idx) : null;
+    // LAD: convertir en % si besoin
+    if (cfg.isLadPct && idx!==-1) {
+      var ca26arr = CA26_M[idx];
+      d26 = d26.map(function(v,mi){return ca26arr[mi]>0?parseFloat((v/ca26arr[mi]*100).toFixed(1)):0;});
+    }
+    var datasets = [];
+    if (d25 && (detailYear===25||detailYear==='both')) {
+      datasets.push({label:cfg.label+' 2025',data:d25,borderColor:'#8b8fa8',backgroundColor:'rgba(139,143,168,0.1)',fill:true,tension:0.4,pointRadius:5,borderWidth:2,pointBackgroundColor:'#8b8fa8'});
+    }
+    if (detailYear===26||detailYear==='both'||!d25) {
+      datasets.push({label:cfg.label+' 2026',data:d26.map(function(v){return v||null;}),borderColor:cfg.color,backgroundColor:cfg.color+'20',fill:true,tension:0.4,pointRadius:5,borderWidth:2,pointBackgroundColor:cfg.color,spanGaps:true});
+    }
+    if (cfg.obj) datasets.push({data:MTHS6.map(function(){return cfg.obj;}),borderColor:'rgba(255,255,255,.2)',borderDash:[4,3],pointRadius:0,borderWidth:1.5,label:'Objectif',backgroundColor:'rgba(0,0,0,0)'});
+    detailChartInst = new Chart(document.getElementById('ca-chart'),{type:'line',data:{labels:MTHS6,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8b8fa8',font:{size:12},boxWidth:12}}},scales:{x:{ticks:{color:'#8b8fa8',font:{size:11}},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{callback:function(v){return fmtV(v,cfg.fmt,'');},color:'#8b8fa8',font:{size:11}},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+    // Tableau mensuel
+    var show25=d25&&(detailYear===25||detailYear==='both'),show26=detailYear===26||detailYear==='both'||!d25,showBoth=show25&&show26;
+    var thead='<tr style="border-bottom:1px solid rgba(255,255,255,.1)"><th style="text-align:left;color:#8b8fa8;font-weight:400;padding:8px;font-size:11px;text-transform:uppercase">Mois</th>';
+    if(show25) thead+='<th style="text-align:right;color:#8b8fa8;font-weight:400;padding:8px;font-size:11px">'+cfg.label+' 2025</th>';
+    if(show26) thead+='<th style="text-align:right;color:#8b8fa8;font-weight:400;padding:8px;font-size:11px">'+cfg.label+' 2026</th>';
+    if(showBoth) thead+='<th style="text-align:right;color:#8b8fa8;font-weight:400;padding:8px;font-size:11px">Écart</th><th style="text-align:right;color:#8b8fa8;font-weight:400;padding:8px;font-size:11px">Évol.</th>';
+    thead+='</tr>';
+    var tbody='', sum25=0, sum26=0, validM=0;
+    MTHS6.forEach(function(m,mi){
+      var v25=d25?d25[mi]:null, v26=d26[mi];
+      if(v25) sum25+=v25; if(v26) sum26+=v26; if(v26) validM++;
+      var d=v25&&v26?v26-v25:null, pct=v25&&v26&&v25!==0?(v26-v25)/Math.abs(v25)*100:null;
+      var cls=pct!=null?(pct>=0?'color:#3dd68c':'color:#f75f5f'):'';
+      var isObjBad = cfg.obj && !cfg.inv && v26<cfg.obj;
+      var isObjGood = cfg.obj && !cfg.inv && v26>=cfg.obj;
+      tbody+='<tr style="border-bottom:1px solid rgba(255,255,255,.05)"><td style="padding:8px;color:#e8eaf0;font-weight:500">'+m+'</td>';
+      if(show25) tbody+='<td style="text-align:right;padding:8px;color:#8b8fa8">'+(v25!=null?fmtV(v25,cfg.fmt,cfg.unit):'—')+'</td>';
+      if(show26) tbody+='<td style="text-align:right;padding:8px;color:'+(isObjBad?'#f75f5f':isObjGood?'#3dd68c':cfg.color)+';font-weight:500">'+(v26?fmtV(v26,cfg.fmt,cfg.unit):'—')+'</td>';
+      if(showBoth) tbody+='<td style="text-align:right;padding:8px;'+cls+'">'+(d!=null?(d>=0?'+':'')+fmtV(Math.abs(d),cfg.fmt,cfg.unit).replace('-',''):'—')+'</td><td style="text-align:right;padding:8px">'+(pct!=null?'<span style="'+cls+';font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.06)">'+(pct>=0?'+':'')+pct.toFixed(1)+'%</span>':'—')+'</td>';
+      tbody+='</tr>';
+    });
+    if (validM>1) {
+      var dT=d25?sum26-sum25:null, pctT=d25&&sum25?(dT/Math.abs(sum25)*100):null, cT=pctT!=null?(pctT>=0?'color:#3dd68c':'color:#f75f5f'):'';
+      tbody+='<tr style="border-top:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04)"><td style="padding:8px;color:#e8eaf0;font-weight:600">TOTAL/MOY</td>';
+      if(show25) tbody+='<td style="text-align:right;padding:8px;color:#8b8fa8;font-weight:600">'+fmtV(sum25,cfg.fmt,cfg.unit)+'</td>';
+      if(show26) tbody+='<td style="text-align:right;padding:8px;color:'+cfg.color+';font-weight:600">'+fmtV(sum26,cfg.fmt,cfg.unit)+'</td>';
+      if(showBoth&&dT!=null) tbody+='<td style="text-align:right;padding:8px;'+cT+';font-weight:600">'+(dT>=0?'+':'')+fmtV(Math.abs(dT),cfg.fmt,cfg.unit)+'</td><td style="text-align:right;padding:8px">'+(pctT!=null?'<span style="'+cT+';font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.06);font-weight:600">'+(pctT>=0?'+':'')+pctT.toFixed(1)+'%</span>':'')+'</td>';
+      tbody+='</tr>';
+    }
+    document.getElementById('ca-thead').innerHTML=thead;
+    document.getElementById('ca-tbody').innerHTML=tbody;
+  } else {
+    // ── Mode annuel : bar chart par restaurant ──
+    var d26a = getAnnualData(cfg.annD26);
+    var d25a = cfg.annD25?getAnnualData(cfg.annD25):null;
+    var dM   = cfg.moisD26?getAnnualData(cfg.moisD26):null;
+    var dObj = cfg.annObj?getAnnualData(cfg.annObj):null;
+    var datasets2 = [];
+    if (d25a&&(detailYear===25||detailYear==='both')) datasets2.push({label:cfg.label+' 2025',data:d25a,backgroundColor:'rgba(139,143,168,0.5)',borderWidth:0,borderRadius:4});
+    if (detailYear===26||detailYear==='both'||!d25a) datasets2.push({label:cfg.label+' 2026',data:d26a,backgroundColor:cfg.color+'aa',borderWidth:0,borderRadius:4});
+    if (dM) datasets2.push({label:'Mois en cours',data:dM,backgroundColor:cfg.color+'55',borderWidth:0,borderRadius:4});
+    if (dObj) datasets2.push({label:'Objectif',data:dObj,type:'line',borderColor:'rgba(255,255,255,.3)',borderDash:[4,3],pointRadius:0,borderWidth:1.5,backgroundColor:'rgba(0,0,0,0)'});
+    detailChartInst = new Chart(document.getElementById('ca-chart'),{type:'bar',data:{labels:R,datasets:datasets2},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8b8fa8',font:{size:11},boxWidth:10}}},scales:{x:{ticks:{color:'#8b8fa8',font:{size:10}},grid:{display:false}},y:{ticks:{callback:function(v){return fmtV(v,cfg.fmt,'');},color:'#8b8fa8',font:{size:11}},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+    // Tableau par restaurant
+    var thead2='<tr style="border-bottom:1px solid rgba(255,255,255,.1)"><th style="text-align:left;color:#8b8fa8;font-weight:400;padding:8px;font-size:11px;text-transform:uppercase">Restaurant</th>';
+    if(d25a&&(detailYear===25||detailYear==='both')) thead2+='<th style="text-align:right;color:#8b8fa8;font-weight:400;padding:8px;font-size:11px">2025</th>';
+    thead2+='<th style="text-align:right;color:#8b8fa8;font-weight:400;padding:8px;font-size:11px">2026</th>';
+    if(dM) thead2+='<th style="text-align:right;color:#8b8fa8;font-weight:400;padding:8px;font-size:11px">Mois</th>';
+    if(dObj) thead2+='<th style="text-align:right;color:#8b8fa8;font-weight:400;padding:8px;font-size:11px">Obj.</th>';
+    if(d25a&&(detailYear===25||detailYear==='both')) thead2+='<th style="text-align:right;color:#8b8fa8;font-weight:400;padding:8px;font-size:11px">Évol. 26vs25</th>';
+    thead2+='</tr>';
+    var tbody2='';
+    R.forEach(function(r,ri){
+      var v26=d26a[ri], v25=d25a?d25a[ri]:null, vm=dM?dM[ri]:null, vo=dObj?dObj[ri]:null;
+      var pct=v25&&v26&&v25!==0?(v26-v25)/Math.abs(v25)*100:null;
+      var cls26=cfg.obj?((!cfg.inv&&v26>=cfg.obj)||( cfg.inv&&v26<=cfg.obj)?'#3dd68c':v26!=null?'#f75f5f':cfg.color):cfg.color;
+      var clsPct=pct!=null?(pct>=0?'color:#3dd68c':'color:#f75f5f'):'';
+      tbody2+='<tr style="border-bottom:1px solid rgba(255,255,255,.05)"><td style="padding:8px;color:#e8eaf0;font-weight:500">'+r+'</td>';
+      if(d25a&&(detailYear===25||detailYear==='both')) tbody2+='<td style="text-align:right;padding:8px;color:#8b8fa8">'+(v25!=null?fmtV(v25,cfg.fmt,cfg.unit):'—')+'</td>';
+      tbody2+='<td style="text-align:right;padding:8px;color:'+cls26+';font-weight:500">'+fmtV(v26,cfg.fmt,cfg.unit)+'</td>';
+      if(dM) tbody2+='<td style="text-align:right;padding:8px;color:#8b8fa8">'+(vm!=null?fmtV(vm,cfg.fmt,cfg.unit):'—')+'</td>';
+      if(dObj) tbody2+='<td style="text-align:right;padding:8px;color:#8b8fa8">'+fmtV(vo,cfg.fmt,cfg.unit)+'</td>';
+      if(d25a&&(detailYear===25||detailYear==='both')) tbody2+='<td style="text-align:right;padding:8px">'+(pct!=null?'<span style="'+clsPct+';font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.06)">'+(pct>=0?'+':'')+pct.toFixed(1)+'%</span>':'—')+'</td>';
+      tbody2+='</tr>';
+    });
+    document.getElementById('ca-thead').innerHTML=thead2;
+    document.getElementById('ca-tbody').innerHTML=tbody2;
+  }
+  updateCABtns();
+}
+
+document.getElementById('ca-modal').addEventListener('click',function(e){if(e.target===this)closeCAModal();});
 </script>
+
 </body>
 </html>
