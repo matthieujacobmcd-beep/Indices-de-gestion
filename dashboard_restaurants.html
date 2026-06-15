@@ -943,10 +943,10 @@ function renderAccBtns(idx, period) {
     +'<div class="kbtn-sub"><span class="kbtn-ref">2025 : '+fmt(ca25)+'</span> '+mkD(ca26,ca25,false,false)+'</div>'
     +'</div>';
     html += '<div class="kbtn blue" onclick="openDetailModal(\'tacs\','+idx+')" style="cursor:pointer"><div class="kbtn-label">TAC\'S Annuel ↗</div><div class="kbtn-value '+(tc>=tc25?'ok':'bad')+'">'+tc.toLocaleString('fr-FR')+'</div><div class="kbtn-sub"><span class="kbtn-ref">2025 : '+tc25.toLocaleString('fr-FR')+'</span> '+mkD(tc,tc25,false,false)+'</div></div>';
-    html += '<div class="kbtn blue" onclick="openDetailModal('mb','+idx+')" style="cursor:pointer"><div class="kbtn-label">Marge Brute <span style="font-size:10px;opacity:.6">↗</span></div><div class="kbtn-value '+vc(mb26,76,74)+'">'+mb26.toFixed(1)+'%</div><div class="kbtn-sub"><span class="kbtn-ref">2025 : '+mb25.toFixed(1)+'%</span> '+mkD(mb26,mb25,false,true)+'</div></div>';
-    html += '<div class="kbtn blue" onclick="openDetailModal('pac','+idx+')" style="cursor:pointer"><div class="kbtn-label">PAC <span style="font-size:10px;opacity:.6">↗</span></div><div class="kbtn-value '+vc(pac26,35,33)+'">'+pac26.toFixed(1)+'%</div><div class="kbtn-sub"><span class="kbtn-ref">2025 : '+pac25.toFixed(1)+'%</span> '+mkD(pac26,pac25,false,true)+'</div></div>';
-    html += '<div class="kbtn blue" onclick="openDetailModal('net','+idx+')" style="cursor:pointer"><div class="kbtn-label">Résultat Net <span style="font-size:10px;opacity:.6">↗</span></div><div class="kbtn-value '+(net26>=0?'ok':'bad')+'">'+fmt(net26)+'</div><div class="kbtn-sub"><span class="kbtn-ref">2025 : '+fmt(net25)+'</span> '+mkD(net26,net25,false,false)+'</div></div>';
-    html += '<div class="kbtn blue" onclick="openDetailModal('cf','+idx+')" style="cursor:pointer"><div class="kbtn-label">Cash Flow <span style="font-size:10px;opacity:.6">↗</span></div><div class="kbtn-value '+vc(cf26-cf25,0,null)+'">'+fmt(cf26)+'</div><div class="kbtn-sub"><span class="kbtn-ref">2025 : '+fmt(cf25)+'</span> '+mkD(cf26,cf25,false,false)+'</div></div>';
+    html += '<div class="kbtn blue" onclick="openDetailModal(\'mb\','+idx+')" style="cursor:pointer"><div class="kbtn-label">Marge Brute <span style="font-size:10px;opacity:.6">↗</span></div><div class="kbtn-value '+vc(mb26,76,74)+'">'+mb26.toFixed(1)+'%</div><div class="kbtn-sub"><span class="kbtn-ref">2025 : '+mb25.toFixed(1)+'%</span> '+mkD(mb26,mb25,false,true)+'</div></div>';
+    html += '<div class="kbtn blue" onclick="openDetailModal(\'pac\','+idx+')" style="cursor:pointer"><div class="kbtn-label">PAC <span style="font-size:10px;opacity:.6">↗</span></div><div class="kbtn-value '+vc(pac26,35,33)+'">'+pac26.toFixed(1)+'%</div><div class="kbtn-sub"><span class="kbtn-ref">2025 : '+pac25.toFixed(1)+'%</span> '+mkD(pac26,pac25,false,true)+'</div></div>';
+    html += '<div class="kbtn blue" onclick="openDetailModal(\'net\','+idx+')" style="cursor:pointer"><div class="kbtn-label">Résultat Net <span style="font-size:10px;opacity:.6">↗</span></div><div class="kbtn-value '+(net26>=0?'ok':'bad')+'">'+fmt(net26)+'</div><div class="kbtn-sub"><span class="kbtn-ref">2025 : '+fmt(net25)+'</span> '+mkD(net26,net25,false,false)+'</div></div>';
+    html += '<div class="kbtn blue" onclick="openDetailModal(\'cf\','+idx+')" style="cursor:pointer"><div class="kbtn-label">Cash Flow <span style="font-size:10px;opacity:.6">↗</span></div><div class="kbtn-value '+vc(cf26-cf25,0,null)+'">'+fmt(cf26)+'</div><div class="kbtn-sub"><span class="kbtn-ref">2025 : '+fmt(cf25)+'</span> '+mkD(cf26,cf25,false,false)+'</div></div>';
   } else if (isMois) {
     var cam=gv(DMOIS.ca,idx,'sum');
     var caRef=gv(D.ca,idx,'sum'); // Annuel comme référence
@@ -1276,7 +1276,7 @@ var detailChartInst = null;
 var detailYear = 'both';
 // Alias pour compatibilité CA modal
 var caModalIdx = -1; var caModalYear = 'both'; var caChartInst = null;
-function openCAModal(idx){ openDetailModal('ca', idx); }
+function openCAModal(idx){ openDetailModal(\'ca\', idx); }
 
 // Config des indicateurs
 var INDIC = {
